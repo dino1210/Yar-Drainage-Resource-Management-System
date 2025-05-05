@@ -1,5 +1,8 @@
 const db = require("../config/db");
 const QRCode = require("qrcode");
+const path = require("path");
+const fs = require("fs");
+const { v4: uuidv4 } = require("uuid");
 
 // ADD
 const addVehicle = async (vehicleData) => {
@@ -18,7 +21,22 @@ const addVehicle = async (vehicleData) => {
     maintenance_due,
     assigned_driver,
   } = vehicleData;
-  const insertQuery = `INSERT INTO vehicles (picture, name, brand, plate_no, category, fuel_type, location, acquisition_date, status, remarks, maintenance_due, warranty, assigned_driver) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+  // Generate unique QR code ID
+  const qrCodeId = `VEHICLE-${uuidv4()}`;
+
+  // Define file path for the QR image
+  const fileName = `${qrCodeId}.png`;
+  const qrFolderPath = path.join(__dirname, "..", "public/assets/qr/vehicles");
+  const qrFilePath = path.join(qrFolderPath, fileName);
+  const qrPublicPath = `${fileName}`;
+
+  // Ensure QR folder exists
+  if (!fs.existsSync(qrFolderPath)) {
+    fs.mkdirSync(qrFolderPath, { recursive: true });
+  }
+
+  const insertQuery = `INSERT INTO vehicles (picture, name, brand, plate_no, category, fuel_type, location, acquisition_date, status, remarks, maintenance_due, warranty, assigned_driver, qr_code_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   try {
     const [result] = await db.query(insertQuery, [
@@ -35,38 +53,32 @@ const addVehicle = async (vehicleData) => {
       maintenance_due,
       warranty,
       assigned_driver,
+      qrCodeId,
     ]);
 
     const vehicleId = result.insertId;
-    const qrContent = `vehicle-${vehicleId}`;
-    const qrImage = await QRCode.toDataURL(qrContent);
 
-    // Update tool with QR code
-    const updateQuery = `UPDATE vehicles SET qr = ? WHERE id = ?`;
-    await db.query(updateQuery, [qrImage, vehicleId]);
+    // Generate and save QR image to disk
+    await QRCode.toFile(qrFilePath, qrCodeId);
 
-    return { id: vehicleId, qr: qrImage };
+    // Save public path to image in DB
+    const updateQuery = `UPDATE vehicles SET qr = ? WHERE vehicle_id = ?`;
+    await db.query(updateQuery, [qrPublicPath, vehicleId]);
+
+    return {
+      vehicle_id: vehicleId,
+      qr_code_id: qrCodeId,
+      qr: qrPublicPath,
+    };
   } catch (err) {
     throw new Error("Error adding vehicle: " + err.message);
-  }
-};
-
-// DELETE
-const deleteVehicle = async (vehicleID) => {
-  const query = `DELETE FROM vehicles WHERE id = ?`;
-
-  try {
-    const [result] = await db.query(query, [vehicleID]);
-    return result;
-  } catch (err) {
-    throw new Error("Error deleting vehicle: " + err.message);
   }
 };
 
 // UPDATE
 const updateVehicle = async (vehicleData) => {
   const {
-    id,
+    vehicle_id,
     picture,
     name,
     brand,
@@ -81,11 +93,12 @@ const updateVehicle = async (vehicleData) => {
     assigned_driver,
     qr,
   } = vehicleData;
+
   const query = `
         UPDATE vehicles SET picture = ?, name = ?, brand = ?, plate_no = ?, category = ?, 
         fuel_type = ?, location = ?, acquisition_date = ?, status = ?, remarks = ?, maintenance_due = ?, 
-        assigned_driver = ?, qr = ? 
-        WHERE id = ?
+        assigned_driver = ?, qr = ?, qr_code_id
+        WHERE vehicle_id = ?
     `;
 
   try {
@@ -103,21 +116,27 @@ const updateVehicle = async (vehicleData) => {
       maintenance_due,
       assigned_driver,
       qr,
-      id,
+      vehicle_id,
     ]);
-    const vehicleId = result.insertId;
-    const qrContent = `vehicle-${vehicleId}`; // This will be scanned
-    const qrImage = await QRCode.toDataURL(qrContent); // base64 image
 
-    // Update tool with QR code
-    const updateQuery = `UPDATE vehicles SET qr = ? WHERE id = ?`;
-    await db.query(updateQuery, [qrImage, toolId]);
-
-    return { id: vehicleId, qr: qrImage };
+    return result;
   } catch (err) {
-    throw new Error("Error adding vehicle: " + err.message);
+    throw new Error("Error updating vehicle: " + err.message);
   }
 };
+
+// DELETE
+const deleteVehicle = async (vehicleID) => {
+  const query = `DELETE FROM vehicles WHERE vehicle_id = ?`;
+
+  try {
+    const [result] = await db.query(query, [vehicleID]);
+    return result;
+  } catch (err) {
+    throw new Error("Error deleting vehicle: " + err.message);
+  }
+};
+
 
 // GET ALL TOOLS
 const getAllVehicles = async () => {
@@ -133,7 +152,7 @@ const getAllVehicles = async () => {
 
 // GET SINGLE TOOL BY ID
 const getVehicleById = async (vehicleId) => {
-  const query = `SELECT * FROM vehicles WHERE id = ?`;
+  const query = `SELECT * FROM vehicles WHERE vehicle_id = ?`;
 
   try {
     const [results] = await db.query(query, [vehicleId]);
@@ -143,10 +162,31 @@ const getVehicleById = async (vehicleId) => {
   }
 };
 
+const searchVehicles = async (query) => {
+  const [rows] = await db.query(
+    `
+    SELECT vehicle_id, name, plate_no, category, remarks, assigned_driver
+    FROM vehicles
+    WHERE status = 'Available' 
+    AND (
+    LOWER(name) LIKE LOWER(?) OR
+    LOWER(plate_no) LIKE LOWER(?) OR
+    LOWER(category) LIKE LOWER(?) OR
+    LOWER(remarks) LIKE LOWER(?)
+    )
+    LIMIT 3
+    `,
+    Array(4).fill(`%${query}%`)
+  );
+  return rows;
+}
+
+
 module.exports = {
   addVehicle,
   deleteVehicle,
   updateVehicle,
   getAllVehicles,
   getVehicleById,
+  searchVehicles,
 };

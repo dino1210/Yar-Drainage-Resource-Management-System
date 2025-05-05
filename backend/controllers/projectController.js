@@ -1,0 +1,101 @@
+// controllers/projectController.js
+const Project = require("../models/projectModel");
+
+const createProject = async (req, res) => {
+  try {
+    const {
+      name,
+      person_in_charge,
+      location,
+      description,
+      start_date,
+      end_date,
+      tool_ids,
+      consumable_ids,
+      vehicle_ids,
+    } = req.body;
+
+    if (
+      !name ||
+      !person_in_charge ||
+      !description ||
+      !location ||
+      !start_date ||
+      !end_date
+    ) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // Create new project
+    const result = await Project.createProject({
+      name,
+      person_in_charge,
+      location,
+      description,
+      start_date,
+      end_date,
+    });
+
+    const projectId = result.insertId;
+    console.log("Project created with ID:", projectId);
+    console.log("Tool IDs received:", tool_ids); // already in your snippet
+
+    if (tool_ids && tool_ids.length > 0) {
+      try {
+        await Project.linkToolsToProject(projectId, tool_ids, start_date);
+      } catch (err) {
+        console.error("Error in linkToolsToProject:", err);
+        return res
+          .status(500)
+          .json({ message: "Failed to link tools to project." });
+      }
+    }
+
+    // Link vehicles to the project
+    if (consumable_ids && consumable_ids.length > 0) {
+      try {
+        await Project.linkConsumablesToProject(projectId, consumable_ids, start_date);
+      } catch (err) {
+        console.error("Error in linkConsumablesToProject:", err);
+        return res
+          .status(500)
+          .json({ message: "Failed to link consumables to project." });
+      }
+    }
+
+    // Link vehicles to the project
+    if (vehicle_ids && vehicle_ids.length > 0) {
+      try {
+        await Project.linkVehiclesToProject(projectId, vehicle_ids, start_date);
+      } catch (err) {
+        console.error("Error in linkVehiclesToProject:", err);
+        return res
+          .status(500)
+          .json({ message: "Failed to link vehicles to project." });
+      }
+    }
+
+    res.status(201).json({
+      message: "Project created successfully",
+      projectId,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get All Projects
+const getAllProjects = async (req, res) => {
+  try {
+    const projects = await Project.getAllProjects();
+    res.status(200).json(projects);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  createProject,
+  getAllProjects,
+};

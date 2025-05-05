@@ -22,7 +22,7 @@ const addConsumable = async (req, res) => {
  
 // Controller for DELETE
 const deleteConsumable = async (req, res) => {
-    const consumableId = req.params.id;
+    const consumableId = req.params.consumable_id;
     try {
         const result = await Consumable.deleteConsumable(consumableId);
         res.status(200).json({ message: "Consumable deleted successfully" });
@@ -55,6 +55,19 @@ const getAllConsumables = async (req, res) => {
     }
 };
 
+// Search Consumables by name
+const searchConsumables = async (req, res) => {
+    const query = req.query.q;
+  
+    try {
+      const consumables = await Consumable.searchConsumables(query);
+      res.status(200).json(consumables);
+    } catch (err) {
+      console.error("Error searching consumables:", err.message);
+      res.status(500).json({ message: "Error searching consumbles", error: err.message });
+    }
+  };
+
 // Controller for GET TOOL BY ID
 const getConsumableById = async (req, res) => {
     const consumableId = req.params.id;
@@ -69,4 +82,28 @@ const getConsumableById = async (req, res) => {
     }
 };
 
-module.exports = { addConsumable, deleteConsumable, updateConsumable, getAllConsumables, getConsumableById };
+// Controller for SELECT ONLY AVAILABLE CONSUMABLES (for dropdown/table)
+const getAvailableConsumables = async (req, res) => {
+    const db = require("../config/db");
+    try {
+        const [rows] = await db.query(
+            "SELECT name, tag, category, quantity, unit FROM consumables WHERE quantity > 0"
+        );
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error("Error fetching available consumables:", err.message);
+        res.status(500).json({ message: "Server error", error: err.message });
+    }
+};
+
+
+module.exports = {
+  addConsumable,
+  deleteConsumable,
+  updateConsumable,
+  getAllConsumables,
+  getConsumableById,
+  getAvailableConsumables,
+  searchConsumables
+};
+

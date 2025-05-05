@@ -1,7 +1,7 @@
-const mysql = require("mysql2/promise");  // ✅ Use mysql2/promise
+const mysql = require("mysql2/promise");  
 require("dotenv").config();
 
-const db = mysql.createPool({   // ✅ Use createPool() instead of createConnection()
+const db = mysql.createPool({   
     host: process.env.DATABASE_HOST,
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,

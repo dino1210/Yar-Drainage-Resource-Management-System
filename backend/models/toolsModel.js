@@ -1,7 +1,7 @@
 const db = require("../config/db");
 const QRCode = require("qrcode");
 const path = require("path");
-const fs = require("fs")
+const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
 // ADD
@@ -26,7 +26,7 @@ const addTool = async (toolData) => {
   const fileName = `${qrCodeId}.png`;
   const qrFolderPath = path.join(__dirname, "..", "public/assets/qr/tools");
   const qrFilePath = path.join(qrFolderPath, fileName);
-  const qrPublicPath = `${fileName}`; 
+  const qrPublicPath = `${fileName}`;
 
   // Ensure QR folder exists
   if (!fs.existsSync(qrFolderPath)) {
@@ -70,28 +70,16 @@ const addTool = async (toolData) => {
     await QRCode.toFile(qrFilePath, qrCodeId);
 
     // Save public path to image in DB
-    const updateQuery = `UPDATE tools SET qr = ? WHERE id = ?`;
+    const updateQuery = `UPDATE tools SET qr = ? WHERE tool_id = ?`;
     await db.query(updateQuery, [qrPublicPath, toolId]);
 
     return {
-      id: toolId,
+      tool_id: toolId,
       qr_code_id: qrCodeId,
       qr: qrPublicPath,
     };
   } catch (err) {
     throw new Error("Error adding tool: " + err.message);
-  }
-};
-
-// DELETE
-const deleteTool = async (toolID) => {
-  const query = `DELETE FROM tools WHERE id = ?`;
-
-  try {
-    const [result] = await db.query(query, [toolID]);
-    return result;
-  } catch (err) {
-    throw new Error("Error deleting tool: " + err.message);
   }
 };
 
@@ -108,13 +96,13 @@ const updateTool = async (toolData) => {
     warranty,
     status,
     remarks,
-    id,
+    tool_id,
   } = toolData;
 
   const query = `
         UPDATE tools SET picture = ?, name = ?, brand = ?, category = ?, tag = ?,
         description = ?, purchase_date = ?, warranty = ?, status = ?, remarks = ?
-        WHERE id = ?
+        WHERE tool_id = ?
     `;
 
   try {
@@ -129,12 +117,24 @@ const updateTool = async (toolData) => {
       warranty,
       status,
       remarks,
-      id,
+      tool_id,
     ]);
 
     return result;
   } catch (err) {
     throw new Error("Error updating tool: " + err.message);
+  }
+};
+
+// DELETE
+const deleteTool = async (toolID) => {
+  const query = `DELETE FROM tools WHERE tool_id = ?`;
+
+  try {
+    const [result] = await db.query(query, [toolID]);
+    return result;
+  } catch (err) {
+    throw new Error("Error deleting tool: " + err.message);
   }
 };
 
@@ -152,7 +152,7 @@ const getAllTools = async () => {
 
 // GET SINGLE TOOL BY ID
 const getToolById = async (toolId) => {
-  const query = `SELECT * FROM tools WHERE id = ?`;
+  const query = `SELECT * FROM tools WHERE tool_id = ?`;
 
   try {
     const [results] = await db.query(query, [toolId]);
@@ -162,10 +162,33 @@ const getToolById = async (toolId) => {
   }
 };
 
+const searchTools = async (query) => {
+  const [rows] = await db.query(
+    `
+    SELECT tool_id, name, tag, category, remarks 
+    FROM tools 
+    WHERE status = 'Available'
+      AND (
+        LOWER(name) LIKE LOWER(?) OR 
+        LOWER(tag) LIKE LOWER(?) OR 
+        LOWER(category) LIKE LOWER(?) OR 
+        LOWER(remarks) LIKE LOWER(?)
+      )
+    LIMIT 3
+    `,
+    Array(4).fill(`%${query}%`)
+  );
+  return rows;
+};
+
+
+
+
 module.exports = {
   addTool,
   deleteTool,
   updateTool,
   getAllTools,
   getToolById,
+  searchTools,
 };

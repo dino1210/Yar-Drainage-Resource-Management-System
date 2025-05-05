@@ -15,7 +15,7 @@ const addConsumable = async (consumableData) => {
  
 // DELETE
 const deleteConsumable = async (consumableID) => {
-    const query = `DELETE FROM consumables WHERE id = ?`;
+    const query = `DELETE FROM consumables WHERE consumable_id = ?`;
 
     try {
         const [result] = await db.query(query, [consumableID]);
@@ -28,7 +28,7 @@ const deleteConsumable = async (consumableID) => {
 // UPDATE
 const updateConsumable = async (consumableData) => {
     const { picture, tag, name, category, quantity, minStock, unit, location, status, qr, id } = consumableData;
-    const query = `UPDATE consumables SET picture = ?, tag = ?, name = ?, category = ?, quantity = ?, minStock = ?, unit = ?, location = ?, status = ?, qr = ? WHERE id = ?`;
+    const query = `UPDATE consumables SET picture = ?, tag = ?, name = ?, category = ?, quantity = ?, minStock = ?, unit = ?, location = ?, status = ?, qr = ? WHERE consumable_id = ?`;
 
 
     try {
@@ -53,7 +53,7 @@ const getAllConsumables = async () => {
 
 // GET SINGLE TOOL BY ID
 const getConsumableById = async (consumableId) => {
-    const query = `SELECT * FROM consumables WHERE id = ?`;
+    const query = `SELECT * FROM consumables WHERE consumable_id = ?`;
 
     try {
         const [results] = await db.query(query, [consumableId]);
@@ -63,4 +63,23 @@ const getConsumableById = async (consumableId) => {
     }
 };
 
-module.exports = { addConsumable, deleteConsumable, updateConsumable, getAllConsumables, getConsumableById };
+const searchConsumables = async (query) => {
+    const [rows] = await db.query(
+      `
+      SELECT consumable_id, name, tag, quantity, unit 
+      FROM consumables 
+      WHERE status = 'In Stock'
+        AND (
+          LOWER(name) LIKE LOWER(?) OR 
+          LOWER(tag) LIKE LOWER(?) OR 
+          LOWER(quantity) LIKE LOWER(?) OR 
+          LOWER(unit) LIKE LOWER(?)
+        )
+      LIMIT 3
+      `,
+      Array(4).fill(`%${query}%`)
+    );
+    return rows;
+  };
+
+module.exports = { addConsumable, deleteConsumable, updateConsumable, getAllConsumables, getConsumableById, searchConsumables };
