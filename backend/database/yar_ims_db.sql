@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2025 at 02:45 AM
+-- Generation Time: May 05, 2025 at 04:08 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -68,13 +68,11 @@ CREATE TABLE `consumables` (
 --
 
 INSERT INTO `consumables` (`consumable_id`, `picture`, `tag`, `name`, `quantity`, `minStock`, `unit`, `location`, `date`, `status`, `qr`, `category`) VALUES
-(1, '1745822603388-364008207.jpg', ' DISC-002', 'Cutting Disc 4\" 2.5mm', 0, 20, 'pcs', ' Rack 3-Drawer 11', '2025-04-28', 'In Stock', '', ' Cutting Disk'),
-(2, '1745822713321-485494957.jpg', ' DBIT-006', ' Drill Bit Steel 1/2', 0, 3, 'pcs', ' Rack 3-Drawer 17', '2025-04-28', 'In Stock', '', ' Drill Bit'),
+(1, '1745822603388-364008207.jpg', ' DISC-002', 'Cutting Disc 4\" 2.5mm', 99, 20, 'pcs', ' Rack 3-Drawer 11', '2025-04-28', 'In Stock', '', ' Cutting Disk'),
+(2, '1745822713321-485494957.jpg', ' DBIT-006', ' Drill Bit Steel 1/2', 100, 3, 'pcs', ' Rack 3-Drawer 17', '2025-04-28', 'In Stock', '', ' Drill Bit'),
 (3, '1745822960475-604811994.jpg', ' WROD-00', ' Welding Rod N-6011', 10, 25, 'kg', ' Rack 3-Drawer 15', '2025-04-28', 'In Stock', '', ' Welding Rod'),
-(4, '1745823073022-335597718.jpg', ' CLMP-006', ' Metal Clamp 2\" 2 Holes Fab', 0, 5, 'pcs', 'Rcabinet-Drawer 3', '2025-04-28', 'In Stock', '', ' Metal Clamp'),
-(5, '1745823211823-557831080.jpg', ' NAIL-009', ' Concrete Nail 1 1/2\"', 0, 5, 'kg', 'BCabinet-Drawer 8', '2025-04-28', 'In Stock', '', ' Nail'),
-(8, '1745987401853-34847443.png', ' test', ' stest', 7, 6, 'kg', ' manila', '2025-04-30', 'In Stock', '', ' test'),
-(9, '1746088437828-377720996.png', 'SADFASDF', ' SDASD', 12, 12, 'bottles', ' ASDSA', '2025-05-01', 'In Stock', '', 'VDSFDSF');
+(4, '1745823073022-335597718.jpg', ' CLMP-006', ' Metal Clamp 2\" 2 Holes Fab', 100, 5, 'pcs', 'Rcabinet-Drawer 3', '2025-04-28', 'In Stock', '', ' Metal Clamp'),
+(5, '1745823211823-557831080.jpg', ' NAIL-009', ' Concrete Nail 1 1/2\"', 100, 5, 'kg', 'BCabinet-Drawer 8', '2025-04-28', 'In Stock', '', ' Nail');
 
 -- --------------------------------------------------------
 
@@ -118,21 +116,18 @@ CREATE TABLE `projects` (
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `manager` varchar(255) NOT NULL
+  `created_by` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `projects`
 --
 
-INSERT INTO `projects` (`project_id`, `name`, `person_in_charge`, `location`, `description`, `start_date`, `end_date`, `created_at`, `manager`) VALUES
-(71, 'hbjn', ' jm,', ' jbnm', 'hblnjk', '2025-05-05', '2025-05-06', '2025-05-04 12:54:19', ''),
-(72, 'GBHKJNL<', 'GBKHNJM', 'GBHKNJML', 'gbuhnjilmkl,', '2025-05-06', '2025-05-12', '2025-05-04 12:56:24', ''),
-(73, 'GBHKJNL<', 'GBKHNJM', 'GBHKNJML', 'gbuhnjilmkl,', '2025-05-06', '2025-05-12', '2025-05-04 12:56:56', ''),
-(74, 'hbnljkm', 'hjnkm', 'bhlnjkm,', 'bhnjkml,', '2025-05-13', '2025-05-21', '2025-05-04 12:57:22', ''),
-(75, 'INITIAL TEST', 'MAAM MAY', 'MAAM BATAR', 'PUTANGINANYONG DALAWA', '2025-05-06', '2025-05-07', '2025-05-04 13:55:05', ''),
-(76, ' bj', 'gbhjn', 'ygbhjn', 'gybhjnk', '2025-05-06', '2025-05-20', '2025-05-04 14:35:41', ''),
-(77, 'PUTANGINAMO MAAM MAY', 'ISA KA PA BATAR', 'AGHHHHHHHHHHHHHHH', 'PAKSHET KAYO BOTH', '2025-05-04', '2025-05-05', '2025-05-04 22:59:22', '');
+INSERT INTO `projects` (`project_id`, `name`, `person_in_charge`, `location`, `description`, `start_date`, `end_date`, `created_at`, `created_by`) VALUES
+(79, 'TUP MANILA DRAINAGE FIX', 'Angelo Padilla', '123 Street Morayta Cubao Expo Diliman', 'The underground drainage system of tup needs to be renovated', '2025-05-21', '2025-05-26', '2025-05-05 13:20:18', ''),
+(80, 'Test Project', 'John Doe', 'Site A', 'Testing', '2025-05-01', '2025-05-31', '2025-05-05 13:26:08', ''),
+(81, 'h jn', 'bhjn', 'gbhn', 'gbh', '2025-05-04', '2025-05-05', '2025-05-05 13:59:07', 'Admin'),
+(82, 'CREATED BY', 'vkbhnkj', 'bkhnkj', 'bhnkj', '2025-05-04', '2025-05-05', '2025-05-05 14:00:11', 'Admin');
 
 -- --------------------------------------------------------
 
@@ -147,17 +142,6 @@ CREATE TABLE `project_consumables` (
   `allocated_quantity` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `project_consumables`
---
-
-INSERT INTO `project_consumables` (`id`, `project_id`, `consumable_id`, `allocated_quantity`) VALUES
-(6, 73, 1, 1),
-(7, 74, 1, 1),
-(8, 75, 1, 1),
-(9, 76, 1, 1),
-(10, 77, 2, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -171,15 +155,6 @@ CREATE TABLE `project_tools` (
   `created_at` date NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `project_tools`
---
-
-INSERT INTO `project_tools` (`id`, `project_id`, `tool_id`, `created_at`) VALUES
-(35, 75, 1, '2025-05-04'),
-(36, 76, 2, '2025-05-04'),
-(37, 77, 3, '2025-05-05');
-
 -- --------------------------------------------------------
 
 --
@@ -192,15 +167,6 @@ CREATE TABLE `project_vehicles` (
   `vehicle_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `project_vehicles`
---
-
-INSERT INTO `project_vehicles` (`id`, `project_id`, `vehicle_id`, `created_at`) VALUES
-(17, 75, 1, '2025-05-04 13:55:05'),
-(18, 76, 3, '2025-05-04 14:35:41'),
-(19, 77, 4, '2025-05-04 22:59:22');
 
 -- --------------------------------------------------------
 
@@ -229,9 +195,9 @@ CREATE TABLE `tools` (
 --
 
 INSERT INTO `tools` (`tool_id`, `picture`, `name`, `brand`, `category`, `tag`, `description`, `purchase_date`, `warranty`, `status`, `remarks`, `qr`, `qr_code_id`) VALUES
-(1, '1745821307732-503816072.jpg', 'Contender Welding Machine', 'Contender', 'Welding Machine', 'POWER-WLDGM_CONTNDR-1', 'Input Voltage, 220. Maximum Rod Diameter, 4.0 mm. Rated Input Capacity, 10.2', '2025-03-31', '2026-04-27', 'Reserved', 'Brand New', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4.png', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4'),
-(2, '1745821628548-538938628.jpg', 'Dartek Angle Grinder', 'Dartek', 'Angle Grinder', 'POWER-ANGLGRNDR_DARTEK-1', 'Rated Input Power, 760W. No-Load Speed, 11500r/min. Max Wheel Diameter, 100mm. Hole Diameter of Wheel, 16mm.', '2025-03-31', '2025-04-24', 'Reserved', 'Brand New', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c.png', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c'),
-(3, '1745821790372-377372672.jpg', 'Megaman Floodlight ', 'Megaman', 'Light', 'POWER-FLDLIGHT_MGMN-1', '0W 840 IP66 IK08. 711433 ; FL TITO 90W 840 IP66 IK08. 710825 ; FL TITO 120W 840 IP66 IK08.', '2025-04-01', '2049-04-13', 'Issued-out', 'Brand New', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21.png', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21'),
+(1, '1745821307732-503816072.jpg', 'Contender Welding Machine', 'Contender', 'Welding Machine', 'POWER-WLDGM_CONTNDR-1', 'Input Voltage, 220. Maximum Rod Diameter, 4.0 mm. Rated Input Capacity, 10.2', '2025-03-31', '2026-04-27', 'Available', 'Brand New', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4.png', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4'),
+(2, '1745821628548-538938628.jpg', 'Dartek Angle Grinder', 'Dartek', 'Angle Grinder', 'POWER-ANGLGRNDR_DARTEK-1', 'Rated Input Power, 760W. No-Load Speed, 11500r/min. Max Wheel Diameter, 100mm. Hole Diameter of Wheel, 16mm.', '2025-03-31', '2025-04-24', 'Available', 'Brand New', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c.png', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c'),
+(3, '1745821790372-377372672.jpg', 'Megaman Floodlight ', 'Megaman', 'Light', 'POWER-FLDLIGHT_MGMN-1', '0W 840 IP66 IK08. 711433 ; FL TITO 90W 840 IP66 IK08. 710825 ; FL TITO 120W 840 IP66 IK08.', '2025-04-01', '2049-04-13', 'Available', 'Brand New', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21.png', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21'),
 (4, '1745821991819-726796547.jpg', 'Makita Nail Gun', 'Makita', 'Nail Gun', 'POWER-NAILGUN_MKTA-1', 'Nail size capacity: 10-50mm (19/32\"-2\") Nail type: F15-F50 Gauge: 18 Operating pressure: 60-100psi', '2025-03-31', '2027-04-07', 'Available', 'Brand New', 'TOOL-344ede88-66df-4571-adca-79450032c487.png', 'TOOL-344ede88-66df-4571-adca-79450032c487'),
 (5, '1745822173903-752629888.jpg', 'Welding Mask', 'Generic', 'Welding Mask', 'OTHERS-WLDGMASK-1', 'equipped with #12 Dark Glass for safety', '2025-03-31', '2025-04-08', 'Available', 'Brand New', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760.png', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760');
 
@@ -318,10 +284,10 @@ CREATE TABLE `vehicles` (
 --
 
 INSERT INTO `vehicles` (`vehicle_id`, `picture`, `name`, `brand`, `plate_no`, `category`, `fuel_type`, `location`, `acquisition_date`, `status`, `remarks`, `maintenance_due`, `assigned_driver`, `qr`, `warranty`, `qr_code_id`) VALUES
-(1, '1745827381363-558391668.jpg', 'Hino Dump Truck', 'Hino Motors', 'DMP-2345', 'Dump Truck', 'Diesel', 'Yar Main', '2021-04-13', 'Reserved', 'Needs Maintenance', '2025-04-25', 'Nolly Alvarado', 'VEHICLE-8e8b067a-1351-44e1-adf1-7b0e2741a2cb.png', '2025-04-22', 'VEHICLE-8e8b067a-1351-44e1-adf1-7b0e2741a2cb'),
+(1, '1745827381363-558391668.jpg', 'Hino Dump Truck', 'Hino Motors', 'DMP-2345', 'Dump Truck', 'Diesel', 'Yar Main', '2021-04-13', 'Available', 'Needs Maintenance', '2025-04-25', 'Nolly Alvarado', 'VEHICLE-8e8b067a-1351-44e1-adf1-7b0e2741a2cb.png', '2025-04-22', 'VEHICLE-8e8b067a-1351-44e1-adf1-7b0e2741a2cb'),
 (2, '1745827714814-712914986.jpg', 'Isuzu Giga Crane Truck', 'Isuzu', 'CRN-6789', 'Crane Truck', 'Diesel', 'Yar Main', '2025-04-27', 'Available', 'Brand New', '2025-05-27', 'Angelo Padilla', 'VEHICLE-50ed45fc-4dc9-44d0-8682-a8f523bea291.png', '2026-04-27', 'VEHICLE-50ed45fc-4dc9-44d0-8682-a8f523bea291'),
-(3, '1745827872146-579794368.jpg', 'Mitsubishi Fuso Water Tanker', 'Mitsubishi', 'WTK-1122', 'Tanker Truck', 'Diesel', 'Main Warehouse', '2025-04-07', 'Reserved', 'Change oil nyo ya', '2025-08-25', 'Jestro Maverick De Castro', 'VEHICLE-dc79ceea-11ad-49c6-9722-f55416ca149e.png', '2027-04-12', 'VEHICLE-dc79ceea-11ad-49c6-9722-f55416ca149e'),
-(4, '1745827984739-89621926.jpg', 'Hyundai HD320 Flatbed Truck', 'Hyundai', 'FLT-7788', 'Flatbed Truck', 'Diesel', 'Main Warehouse', '2023-04-11', 'Issued-out', 'Brake is a bit off', '2025-09-04', 'Edan Raymunmo', 'VEHICLE-a3ff6853-4af3-4dc9-aceb-9a8470790dc2.png', '2028-04-27', 'VEHICLE-a3ff6853-4af3-4dc9-aceb-9a8470790dc2'),
+(3, '1745827872146-579794368.jpg', 'Mitsubishi Fuso Water Tanker', 'Mitsubishi', 'WTK-1122', 'Tanker Truck', 'Diesel', 'Main Warehouse', '2025-04-07', 'Available', 'Change oil nyo ya', '2025-08-25', 'Jestro Maverick De Castro', 'VEHICLE-dc79ceea-11ad-49c6-9722-f55416ca149e.png', '2027-04-12', 'VEHICLE-dc79ceea-11ad-49c6-9722-f55416ca149e'),
+(4, '1745827984739-89621926.jpg', 'Hyundai HD320 Flatbed Truck', 'Hyundai', 'FLT-7788', 'Flatbed Truck', 'Diesel', 'Main Warehouse', '2023-04-11', 'Available', 'Brake is a bit off', '2025-09-04', 'Edan Raymunmo', 'VEHICLE-a3ff6853-4af3-4dc9-aceb-9a8470790dc2.png', '2028-04-27', 'VEHICLE-a3ff6853-4af3-4dc9-aceb-9a8470790dc2'),
 (5, '1745828075830-924813918.jpg', 'Foton Tornado Tipper Truck', 'Foton', 'TPR-3344', 'Tipper Truck', 'Diesel', 'Main Warehouse', '2025-04-17', 'Available', 'Needs to change oil', '2025-09-29', 'Ronald Labrado', 'VEHICLE-f56a2adf-3b71-4820-b9ab-e0d5bef22288.png', '2026-04-13', 'VEHICLE-f56a2adf-3b71-4820-b9ab-e0d5bef22288');
 
 -- --------------------------------------------------------
@@ -458,25 +424,25 @@ ALTER TABLE `consumables_logs`
 -- AUTO_INCREMENT for table `projects`
 --
 ALTER TABLE `projects`
-  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT for table `project_consumables`
 --
 ALTER TABLE `project_consumables`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `project_tools`
 --
 ALTER TABLE `project_tools`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `project_vehicles`
 --
 ALTER TABLE `project_vehicles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `tools`

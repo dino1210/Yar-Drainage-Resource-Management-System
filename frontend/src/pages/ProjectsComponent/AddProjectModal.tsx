@@ -123,23 +123,25 @@ const AddProjectModal: React.FC<Props> = ({ isOpen, onClose, project }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const user = JSON.parse(localStorage.getItem("user") || "{}");
 
     const projectData = {
       name,
       person_in_charge: personInCharge,
-      manager: user.id,
       location,
       description,
       start_date: startDate?.toISOString().split("T")[0],
       end_date: endDate?.toISOString().split("T")[0],
       tool_ids: selectedTools.map((tool) => tool.tool_id),
+      created_by: user.name,
       consumable_ids: selectedConsumables.map(
         (consumable) => consumable.consumable_id
       ),
       vehicle_ids: selectedVehicles.map((vehicle) => vehicle.vehicle_id),
     };
+
+    console.log("Payload sent:", projectData);
+
 
     try {
       let response;

@@ -3,7 +3,21 @@ import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import PageMeta from "../components/common/PageMeta";
 import AddProjectModal from "./ProjectsComponent/AddProjectModal";
 import axios from "axios";
-import { Eye, Edit, User, MapPin, CalendarDays, CalendarCheck, FileText, Plus, Wrench, Droplet, Truck} from "lucide-react";
+import {
+  Eye,
+  Edit,
+  User,
+  MapPin,
+  CalendarDays,
+  CalendarCheck,
+  FileText,
+  Plus,
+  Wrench,
+  Droplet,
+  Truck,
+  X,
+  UserPen,
+} from "lucide-react";
 
 type Project = {
   project_id: number;
@@ -14,6 +28,7 @@ type Project = {
   start_date: string;
   end_date: string;
   created_at: string;
+  created_by: string;
   status?: "Upcoming" | "On-Going" | "Completed" | "Cancelled";
   tools: Array<{ id: number; name: string; category: string; tag: string }>;
   consumables: Array<{
@@ -41,7 +56,6 @@ export default function Projects() {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
 
   const fetchProjects = async () => {
@@ -72,7 +86,6 @@ export default function Projects() {
 
   const handleViewProject = (project: Project) => {
     setSelectedProject(project);
-    setIsViewModalOpen(true);
   };
 
   const handleEditProject = () => {
@@ -191,6 +204,19 @@ export default function Projects() {
                         day: "numeric",
                       })}
                     </p>
+                    <p className="mt-2 text-xs text-gray-400">Date Created:&nbsp; 
+                    {new Date(project.created_at).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}{" "}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-400">Created By:&nbsp; 
+                    {project.created_by}
+                    </p>
                     <div className="mt-4 flex justify-between items-center">
                       {(() => {
                         const status = getProjectStatus(
@@ -198,10 +224,14 @@ export default function Projects() {
                           project.end_date
                         );
                         const badgeStyles: Record<string, string> = {
-                          Upcoming: "bg-green-100 text-green-800",
-                          "On-Going": "bg-yellow-100 text-yellow-800",
-                          Completed: "bg-blue-100 text-blue-800",
-                          Cancelled: "bg-red-100 text-red-800",
+                          Upcoming:
+                            "bg-green-500/10 text-green-600 dark:bg-green-400/10 dark:text-green-400",
+                          "On-Going":
+                            "bg-yellow-400/10 text-yellow-700 dark:bg-yellow-300/10 dark:text-yellow-300",
+                          Completed:
+                            "bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400",
+                          Cancelled:
+                            "bg-red-500/10 text-red-600 dark:bg-red-400/10 dark:text-red-400",
                         };
 
                         return (
@@ -214,18 +244,18 @@ export default function Projects() {
                           </span>
                         );
                       })()}
-                      <div className="flex">
+                      <div className="flex gap-2">
                         <button
                           onClick={() => handleViewProject(project)}
-                          className="flex items-center text-green-500 hover:text-gray-400 px-2 py-0.5 transition"
+                          className="flex items-center text-green-500 hover:text-gray-400  py-0.5 transition"
                         >
-                          <Eye className="w-5" />
+                          <Eye className="w-7" />
                         </button>
                         <button
                           onClick={() => handleEditProject()}
-                          className="flex items-center text-blue-500 hover:text-blue-400 px-2 py-0.5 transition"
+                          className="flex items-center text-blue-500 hover:text-blue-400  py-0.5 transition"
                         >
-                          <Edit className="w-4" /> 
+                          <Edit className="w-4.5" />
                         </button>
                       </div>
                     </div>
@@ -242,271 +272,293 @@ export default function Projects() {
           )}
         </div>
 
-        <AddProjectModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-        />
+        <AddProjectModal isOpen={isModalOpen} onClose={handleCloseModal} />
 
         {selectedProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="z-10 w-full max-w-xl overflow-y-auto rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
+          <div className="fixed inset-0 z-99999 flex items-center justify-center bg-black/50">
+            <div className="relative z-10 w-full max-w-[45vw] overflow-y-auto rounded-xl bg-white px-5 py-4 shadow-lg dark:bg-gray-900">
+              <div className="absolute top-2 right-3">
+                <button
+                  onClick={() => setSelectedProject(null)}
+                  className=" text-gray-300 hover:bg-gray-300"
+                >
+                  <X size={25} />
+                </button>
+              </div>
               <div className="overflow-y-auto max-h-[65vh] scrollbar-thin dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800 scrollbar-rounded">
-                <div className="flex justify-between items-center w-full">
-                  <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    {selectedProject.name}
-                  </h2>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(selectedProject.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="mt-4 space-y-3 text-base p-5 text-gray-700 dark:text-gray-300">
-                  <div className="flex justify-between space-x-4">
-                    <div className="flex-1">
-                      <span className="font-bold inline-flex items-center gap-2">
-                        <User size={16} /> Person In Charge:
-                      </span>
-                      <p className="text-sm ml-6">
-                        {selectedProject.person_in_charge}
-                      </p>
-                    </div>
-                    <div className="flex-1">
-                      <span className="font-bold inline-flex items-center gap-2">
-                        <MapPin size={16} /> Location:
-                      </span>
-                      <p className="text-sm ml-6">{selectedProject.location}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between space-x-4">
-                    <div className="flex-1">
-                      <span className="font-bold inline-flex items-center gap-2">
-                        <CalendarDays size={16} /> Start Date:
-                      </span>
-                      <p className="text-sm ml-6">
-                        {new Date(
-                          selectedProject.start_date
-                        ).toLocaleDateString(undefined, {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
-                    <div className="flex-1">
-                      <span className="font-bold inline-flex items-center gap-2">
-                        <CalendarCheck size={16} /> Expected End Date:
-                      </span>
-                      <p className="text-sm ml-6">
-                        {new Date(selectedProject.end_date).toLocaleDateString(
-                          undefined,
-                          { year: "numeric", month: "long", day: "numeric" }
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="w-full">
-                    <span className="font-bold inline-flex items-center gap-2">
-                      <FileText size={16} /> Description:
+                <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 mr-5">
+                  <div className="flex justify-between items-center w-full">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                      {selectedProject.name}
+                    </h2>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(
+                        selectedProject.created_at
+                      ).toLocaleDateString()}
                     </span>
-                    <p className="text-sm ml-6">
-                      {selectedProject.description}
-                    </p>
                   </div>
-                  <div className="w-full flex flex-wrap gap-2">
-                    <div className="flex items- text-xs gap-2 border p-4 rounded-xl shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
-                      <Wrench
-                        size={15}
-                        className="text-blue-600 dark:text-blue-400"
-                      />
-                      <span className="font-bold text-gray-800 dark:text-white">
-                        Total Tools: {selectedProject.tools?.length || 0}
-                      </span>
+                  <div className="mt-4 space-y-3 text-base p-5 text-gray-700 dark:text-gray-300">
+                    <div className="flex justify-between space-x-4">
+                      <div className="flex-1">
+                        <span className="font-bold inline-flex items-center gap-2">
+                          <User size={16} /> Person In Charge:
+                        </span>
+                        <p className="text-sm ml-6">
+                          {selectedProject.person_in_charge}
+                        </p>
+                      </div>
+                      <div className="flex-1">
+                        <span className="font-bold inline-flex items-center gap-2">
+                          <MapPin size={16} /> Location:
+                        </span>
+                        <p className="text-sm ml-6">
+                          {selectedProject.location}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="flex items-center text-xs gap-2 border p-4 rounded-xl shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
-                      <Droplet
-                        size={15}
-                        className="text-green-600 dark:text-green-400"
-                      />
-                      <span className="font-bold text-gray-800 dark:text-white">
-                        Total Consumables:{" "}
-                        {selectedProject.consumables?.length || 0}
-                      </span>
+                    <div className="flex justify-between space-x-4">
+                      <div className="flex-1">
+                        <span className="font-bold inline-flex items-center gap-2">
+                          <CalendarDays size={16} /> Start Date:
+                        </span>
+                        <p className="text-sm ml-6">
+                          {new Date(
+                            selectedProject.start_date
+                          ).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      <div className="flex-1">
+                        <span className="font-bold inline-flex items-center gap-2">
+                          <CalendarCheck size={16} /> Expected End Date:
+                        </span>
+                        <p className="text-sm ml-6">
+                          {new Date(
+                            selectedProject.end_date
+                          ).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="flex items-center text-xs gap-2 border p-4 rounded-xl shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
-                      <Truck
-                        size={15}
-                        className="text-yellow-600 dark:text-yellow-400"
-                      />
-                      <span className="font-bold text-gray-800 dark:text-white">
-                        Total Vehicles: {selectedProject.vehicles?.length || 0}
+                    <div className="w-full">
+                      <span className="font-bold inline-flex items-center gap-2">
+                        <FileText size={16} /> Description:
                       </span>
+                      <p className="text-sm ml-6">
+                        {selectedProject.description}
+                      </p>
+                    </div>
+                    <div className="w-full">
+                      <span className="font-bold inline-flex items-center gap-2">
+                        <UserPen size={16} /> Created By:
+                      </span>
+                      <p className="text-sm ml-6 mb-5">
+                        {selectedProject.created_by}
+                      </p>
+                    </div>
+                    <div className="w-full flex flex-wrap gap-2">
+                      <div className="flex items- text-xs gap-2 border p-4 rounded-xl shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
+                        <Wrench
+                          size={15}
+                          className="text-blue-600 dark:text-blue-400"
+                        />
+                        <span className="font-bold text-gray-800 dark:text-white">
+                          Total Tools: {selectedProject.tools?.length || 0}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center text-xs gap-2 border p-4 rounded-xl shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
+                        <Droplet
+                          size={15}
+                          className="text-green-600 dark:text-green-400"
+                        />
+                        <span className="font-bold text-gray-800 dark:text-white">
+                          Total Consumables:{" "}
+                          {selectedProject.consumables?.length || 0}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center text-xs gap-2 border p-4 rounded-xl shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
+                        <Truck
+                          size={15}
+                          className="text-yellow-600 dark:text-yellow-400"
+                        />
+                        <span className="font-bold text-gray-800 dark:text-white">
+                          Total Vehicles:{" "}
+                          {selectedProject.vehicles?.length || 0}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Table for Attached Tools */}
                 <div className="mt-6">
-                  <h3 className="text-base font-semibold text-black dark:text-gray-300">
-                    Tools and Equipments
-                  </h3>
-                  <table className="mt-3 w-full text-xs table-auto border-collapse">
-                    <thead className="text-black bg-gray-700 dark:text-gray-300 text-sm">
-                      <tr>
-                        <th className="px-4 py-2 border  border-gray-300 text-left">
-                          Tool Name
-                        </th>
-                        <th className="px-4 py-2 border border-gray-300 text-left">
-                          Tag
-                        </th>
-                        <th className="px-4 py-2 border border-gray-300 text-left">
-                          Category
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="dark:text-gray-400 ">
-                      {selectedProject.tools &&
-                      selectedProject.tools.length > 0 ? (
-                        selectedProject.tools.map((tool) => (
-                          <tr key={tool.id}>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {tool.name}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {tool.tag}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {tool.category}
-                            </td>
+                  <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 mr-5">
+                    <h3 className="text-base font-semibold text-black dark:text-gray-300">
+                      Tools and Equipments
+                    </h3>
+
+                    <div className="mt-3 overflow-hidden rounded-xl">
+                      <table className="w-full text-sm table-auto  text-gray-700 dark:text-gray-300">
+                        <thead className="bg-gray-400 dark:bg-gray-700 text-sm dark:text-gray-300 text-black rounded-t-xl">
+                          <tr>
+                            <th className="px-4 py-3 text-left">Name</th>
+                            <th className="px-4 py-3 text-left">Tag</th>
+                            <th className="px-4 py-3 text-left">Category</th>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={3}
-                            className="px-4 py-2 border-gray-300 text-center text-gray-500"
-                          >
-                            No tools attached
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        </thead>
+                        <tbody className="bg-gray-50 dark:bg-white/[0.02]">
+                          {selectedProject.tools &&
+                          selectedProject.tools.length > 0 ? (
+                            selectedProject.tools.map((tool) => (
+                              <tr
+                                key={tool.id}
+                                className="hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
+                              >
+                                <td className="px-4 py-3 text-xs">
+                                  {tool.name}
+                                </td>
+                                <td className="px-4 py-3 text-xs">
+                                  {tool.tag}
+                                </td>
+                                <td className="px-4 py-3 text-xs">
+                                  {tool.category}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={3}
+                                className="px-4 py-3 text-center text-gray-500 dark:text-gray-400"
+                              >
+                                No tools attached
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Table for Attached Consumables */}
                 <div className="mt-6">
-                  <h3 className="text-base font-semibold text-black dark:text-gray-300">
-                    Consumables
-                  </h3>
-                  <table className="mt-3 w-full text-xs table-auto border-collapse">
-                    <thead className="text-black bg-gray-700 dark:text-gray-300 text-sm">
-                      <tr>
-                        <th className="px-4 py-2 border border-gray-300 text-left">
-                          Name
-                        </th>
-                        <th className="px-4 py-2 border border-gray-300 text-left">
-                          Tag
-                        </th>
-                        <th className="px-4 py-2 border border-gray-300 text-left">
-                          Quantity
-                        </th>
-                        <th className="px-4 py-2 border border-gray-300 text-left">
-                          Unit
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="dark:text-gray-400">
-                      {selectedProject.consumables &&
-                      selectedProject.consumables.length > 0 ? (
-                        selectedProject.consumables.map((item, index) => (
-                          <tr key={index}>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {item.name}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {item.tag}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {item.allocated_quantity}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {item.unit}
-                            </td>
+                  <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 mr-5">
+                    <h3 className="text-base font-semibold text-black dark:text-gray-300">
+                      Consumables
+                    </h3>
+
+                    <div className="mt-3 overflow-hidden rounded-xl">
+                      <table className="w-full text-sm table-auto text-gray-700 dark:text-gray-300">
+                        <thead className="bg-gray-400 dark:bg-gray-700 text-sm dark:text-gray-300 text-black rounded-t-xl">
+                          <tr>
+                            <th className="px-4 py-3 text-left">Name</th>
+                            <th className="px-4 py-3 text-left">Tag</th>
+                            <th className="px-4 py-3 text-left">Quantity</th>
+                            <th className="px-4 py-3 text-left">Unit</th>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={3}
-                            className="px-4 py-2 border-gray-300 text-center text-gray-500"
-                          >
-                            No consumables attached
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        </thead>
+                        <tbody className="bg-gray-50 dark:bg-white/[0.02]">
+                          {selectedProject.consumables &&
+                          selectedProject.consumables.length > 0 ? (
+                            selectedProject.consumables.map((item, index) => (
+                              <tr
+                                key={index}
+                                className="hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
+                              >
+                                <td className="px-4 py-3 text-xs">
+                                  {item.name}
+                                </td>
+                                <td className="px-4 py-3 text-xs">
+                                  {item.tag}
+                                </td>
+                                <td className="px-4 py-3 text-xs">
+                                  {item.allocated_quantity}
+                                </td>
+                                <td className="px-4 py-3 text-xs">
+                                  {item.unit}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={4}
+                                className="px-4 py-3 text-center text-gray-500 dark:text-gray-400"
+                              >
+                                No consumables attached
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Table for Attached Vehicles */}
                 <div className="mt-6">
-                  <h3 className="text-base font-semibold text-black dark:text-gray-300">
-                    Vehicles
-                  </h3>
-                  <table className="mt-3 w-full text-xs table-auto border-collapse">
-                    <thead className="text-black bg-gray-700 dark:text-gray-300 text-sm">
-                      <tr>
-                        <th className="px-4 py-2 border  border-gray-300 text-left">
-                          Vehicle Name
-                        </th>
-                        <th className="px-4 py-2 border border-gray-300 text-left">
-                          Plate No.
-                        </th>
-                        <th className="px-4 py-2 border border-gray-300 text-left">
-                          Assigned Driver
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="dark:text-gray-400 ">
-                      {selectedProject.vehicles &&
-                      selectedProject.vehicles.length > 0 ? (
-                        selectedProject.vehicles.map((vehicle) => (
-                          <tr key={vehicle.id}>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {vehicle.name}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {vehicle.plate_no}
-                            </td>
-                            <td className="px-4 py-2 border border-gray-300">
-                              {vehicle.assigned_driver}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={3}
-                            className="px-4 py-2 border-gray-300 text-center text-gray-500"
-                          >
-                            No vehicles attached
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                  <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 mr-5">
+                    <h3 className="text-base font-semibold text-black dark:text-gray-300">
+                      Vehicles
+                    </h3>
 
-                <div className="mt-6 text-right">
-                  <button
-                    onClick={() => setSelectedProject(null)}
-                    className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                  >
-                    Close
-                  </button>
+                    <div className="mt-3 overflow-hidden rounded-xl">
+                      <table className="w-full text-sm table-auto text-gray-700 dark:text-gray-300">
+                        <thead className="bg-gray-400 dark:bg-gray-700 text-sm dark:text-gray-300 text-black rounded-t-xl">
+                          <tr>
+                            <th className="px-4 py-3 text-left">
+                              Vehicle Name
+                            </th>
+                            <th className="px-4 py-3 text-left">Plate No.</th>
+                            <th className="px-4 py-3 text-left">
+                              Assigned Driver
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-gray-50 dark:bg-white/[0.02]">
+                          {selectedProject.vehicles &&
+                          selectedProject.vehicles.length > 0 ? (
+                            selectedProject.vehicles.map((vehicle) => (
+                              <tr
+                                key={vehicle.id}
+                                className="hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
+                              >
+                                <td className="px-4 py-3 text-xs">
+                                  {vehicle.name}
+                                </td>
+                                <td className="px-4 py-3 text-xs">
+                                  {vehicle.plate_no}
+                                </td>
+                                <td className="px-4 py-3 text-xs">
+                                  {vehicle.assigned_driver}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={3}
+                                className="px-4 py-3 text-center text-gray-500 dark:text-gray-400"
+                              >
+                                No vehicles attached
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

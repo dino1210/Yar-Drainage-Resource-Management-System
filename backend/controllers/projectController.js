@@ -12,6 +12,7 @@ const createProject = async (req, res) => {
       end_date,
       tool_ids,
       consumable_ids,
+      created_by,
       vehicle_ids,
     } = req.body;
 
@@ -21,7 +22,8 @@ const createProject = async (req, res) => {
       !description ||
       !location ||
       !start_date ||
-      !end_date
+      !end_date ||
+      !created_by 
     ) {
       return res.status(400).json({ message: "All fields are required." });
     }
@@ -34,6 +36,7 @@ const createProject = async (req, res) => {
       description,
       start_date,
       end_date,
+      created_by,
     });
 
     const projectId = result.insertId;
@@ -95,7 +98,17 @@ const getAllProjects = async (req, res) => {
   }
 };
 
+const getRecentProjects = async (req, res) => {
+  try {
+    const recentProjects = await Project.getRecentProjects();
+    res.status(200).json(recentProjects);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createProject,
   getAllProjects,
+  getRecentProjects,
 };

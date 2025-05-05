@@ -3,8 +3,8 @@ const db = require("../config/db");
 // CREATE PROJECT
 const createProject = async (projectData) => {
   const query = `
-    INSERT INTO projects (name, person_in_charge, location, description, start_date, end_date)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO projects (name, person_in_charge, location, description, start_date, end_date, created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
   const values = [
     projectData.name,
@@ -13,6 +13,7 @@ const createProject = async (projectData) => {
     projectData.description,
     projectData.start_date,
     projectData.end_date,
+    projectData.created_by,
   ];
 
   try {
@@ -20,6 +21,8 @@ const createProject = async (projectData) => {
     return results;
   } catch (error) {
     console.error("Error creating project:", error.message);
+    console.error("Error creating project:", error.message, error);
+
     throw error;
   }
 };
@@ -149,6 +152,7 @@ const getAllProjects = async () => {
       p.start_date,
       p.end_date,
       p.created_at,
+      p.created_by,
 
       -- Tool details
       t.tool_id,
@@ -197,6 +201,7 @@ const getAllProjects = async () => {
           start_date: row.start_date,
           end_date: row.end_date,
           created_at: row.created_at,
+          created_by: row.created_by,
           tools: [],
           consumables: [],
           vehicles: [],
@@ -251,10 +256,22 @@ const getAllProjects = async () => {
   }
 };
 
+// GET RECENTLY CREATED PROJECTS
+const getRecentProjects = async () => {
+  const [rows] = await db.query(
+    `SELECT * FROM projects ORDER BY created_at DESC LIMIT 5`
+  );
+  return rows;
+};
+
+
+
+
 module.exports = {
   createProject,
   linkToolsToProject,
   linkConsumablesToProject,
   linkVehiclesToProject,
   getAllProjects,
+  getRecentProjects,
 };
