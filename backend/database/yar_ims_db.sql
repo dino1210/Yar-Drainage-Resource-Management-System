@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 01, 2025 at 06:46 PM
+-- Generation Time: May 05, 2025 at 02:45 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -49,7 +49,7 @@ INSERT INTO `categories` (`id`, `category_type`, `category_name`) VALUES
 --
 
 CREATE TABLE `consumables` (
-  `id` int(11) NOT NULL,
+  `consumable_id` int(11) NOT NULL,
   `picture` varchar(255) NOT NULL,
   `tag` varchar(50) NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -67,10 +67,10 @@ CREATE TABLE `consumables` (
 -- Dumping data for table `consumables`
 --
 
-INSERT INTO `consumables` (`id`, `picture`, `tag`, `name`, `quantity`, `minStock`, `unit`, `location`, `date`, `status`, `qr`, `category`) VALUES
-(1, '1745822603388-364008207.jpg', ' DISC-002', 'Cutting Disc 4\" 2.5mm', 7, 20, 'pcs', ' Rack 3-Drawer 11', '2025-04-28', 'In Stock', '', ' Cutting Disk'),
-(2, '1745822713321-485494957.jpg', ' DBIT-006', ' Drill Bit Steel 1/2', 2, 3, 'pcs', ' Rack 3-Drawer 17', '2025-04-28', 'In Stock', '', ' Drill Bit'),
-(3, '1745822960475-604811994.jpg', ' WROD-00', ' Welding Rod N-6011', 11, 25, 'kg', ' Rack 3-Drawer 15', '2025-04-28', 'In Stock', '', ' Welding Rod'),
+INSERT INTO `consumables` (`consumable_id`, `picture`, `tag`, `name`, `quantity`, `minStock`, `unit`, `location`, `date`, `status`, `qr`, `category`) VALUES
+(1, '1745822603388-364008207.jpg', ' DISC-002', 'Cutting Disc 4\" 2.5mm', 0, 20, 'pcs', ' Rack 3-Drawer 11', '2025-04-28', 'In Stock', '', ' Cutting Disk'),
+(2, '1745822713321-485494957.jpg', ' DBIT-006', ' Drill Bit Steel 1/2', 0, 3, 'pcs', ' Rack 3-Drawer 17', '2025-04-28', 'In Stock', '', ' Drill Bit'),
+(3, '1745822960475-604811994.jpg', ' WROD-00', ' Welding Rod N-6011', 10, 25, 'kg', ' Rack 3-Drawer 15', '2025-04-28', 'In Stock', '', ' Welding Rod'),
 (4, '1745823073022-335597718.jpg', ' CLMP-006', ' Metal Clamp 2\" 2 Holes Fab', 0, 5, 'pcs', 'Rcabinet-Drawer 3', '2025-04-28', 'In Stock', '', ' Metal Clamp'),
 (5, '1745823211823-557831080.jpg', ' NAIL-009', ' Concrete Nail 1 1/2\"', 0, 5, 'kg', 'BCabinet-Drawer 8', '2025-04-28', 'In Stock', '', ' Nail'),
 (8, '1745987401853-34847443.png', ' test', ' stest', 7, 6, 'kg', ' manila', '2025-04-30', 'In Stock', '', ' test'),
@@ -110,31 +110,97 @@ INSERT INTO `consumables_logs` (`id`, `consumable_name`, `performed_by`, `issued
 --
 
 CREATE TABLE `projects` (
-  `id` int(11) NOT NULL,
-  `title` varchar(255) DEFAULT NULL,
-  `manager` varchar(255) DEFAULT NULL,
-  `person_in_charge` varchar(255) DEFAULT NULL,
-  `tools_equipment_used` text DEFAULT NULL,
-  `consumables_used` text DEFAULT NULL,
-  `vehicles_used` text DEFAULT NULL,
-  `start_date` date DEFAULT NULL,
-  `end_date` date DEFAULT NULL,
-  `status` enum('Ongoing','Completed','Upcoming','Cancelled') DEFAULT NULL,
-  `remarks` text DEFAULT NULL,
-  `creator` varchar(100) DEFAULT 'Yard Admin',
-  `location` varchar(255) NOT NULL
+  `project_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `manager` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `projects`
 --
 
-INSERT INTO `projects` (`id`, `title`, `manager`, `person_in_charge`, `tools_equipment_used`, `consumables_used`, `vehicles_used`, `start_date`, `end_date`, `status`, `remarks`, `creator`, `location`) VALUES
-(105, 'TANGINA MO MAAM MAY ./.', 'Itchoy', 'NOBODY', 'Contender Welding Machine', ' Drill Bit Steel 1/2, Metal Clamp 2\" 2 Holes Fab', 'Hino Dump Truck', '2025-04-30', '2025-05-01', 'Completed', NULL, 'Yard Admin', 'MAKATI'),
-(106, 'hello', 'Itchoy', 'hello', 'Dartek Angle Grinder', ' Drill Bit Steel 1/2', 'Hino Dump Truck', '2025-04-30', '2025-05-01', 'Completed', NULL, 'Yard Admin', 'hello'),
-(107, 'sample', 'Itchoy', 'sample', 'Contender Welding Machine', 'Cutting Disc 4\" 2.5mm', 'Hino Dump Truck', '2025-05-01', '2025-05-14', 'Ongoing', NULL, 'Yard Admin', 'sample'),
-(108, 'test', 'Itchoy', 'test', '', '', '', '2025-05-01', '2025-05-01', 'Completed', NULL, 'Yard Admin', 'test'),
-(109, 'ito na talaga', 'Itchoy', 'ito na', '', '', '', '2025-05-02', '2025-05-10', 'Ongoing', NULL, 'Yard Admin', 'makati');
+INSERT INTO `projects` (`project_id`, `name`, `person_in_charge`, `location`, `description`, `start_date`, `end_date`, `created_at`, `manager`) VALUES
+(71, 'hbjn', ' jm,', ' jbnm', 'hblnjk', '2025-05-05', '2025-05-06', '2025-05-04 12:54:19', ''),
+(72, 'GBHKJNL<', 'GBKHNJM', 'GBHKNJML', 'gbuhnjilmkl,', '2025-05-06', '2025-05-12', '2025-05-04 12:56:24', ''),
+(73, 'GBHKJNL<', 'GBKHNJM', 'GBHKNJML', 'gbuhnjilmkl,', '2025-05-06', '2025-05-12', '2025-05-04 12:56:56', ''),
+(74, 'hbnljkm', 'hjnkm', 'bhlnjkm,', 'bhnjkml,', '2025-05-13', '2025-05-21', '2025-05-04 12:57:22', ''),
+(75, 'INITIAL TEST', 'MAAM MAY', 'MAAM BATAR', 'PUTANGINANYONG DALAWA', '2025-05-06', '2025-05-07', '2025-05-04 13:55:05', ''),
+(76, ' bj', 'gbhjn', 'ygbhjn', 'gybhjnk', '2025-05-06', '2025-05-20', '2025-05-04 14:35:41', ''),
+(77, 'PUTANGINAMO MAAM MAY', 'ISA KA PA BATAR', 'AGHHHHHHHHHHHHHHH', 'PAKSHET KAYO BOTH', '2025-05-04', '2025-05-05', '2025-05-04 22:59:22', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `project_consumables`
+--
+
+CREATE TABLE `project_consumables` (
+  `id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `consumable_id` int(11) NOT NULL,
+  `allocated_quantity` int(11) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `project_consumables`
+--
+
+INSERT INTO `project_consumables` (`id`, `project_id`, `consumable_id`, `allocated_quantity`) VALUES
+(6, 73, 1, 1),
+(7, 74, 1, 1),
+(8, 75, 1, 1),
+(9, 76, 1, 1),
+(10, 77, 2, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `project_tools`
+--
+
+CREATE TABLE `project_tools` (
+  `id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `tool_id` int(11) NOT NULL,
+  `created_at` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `project_tools`
+--
+
+INSERT INTO `project_tools` (`id`, `project_id`, `tool_id`, `created_at`) VALUES
+(35, 75, 1, '2025-05-04'),
+(36, 76, 2, '2025-05-04'),
+(37, 77, 3, '2025-05-05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `project_vehicles`
+--
+
+CREATE TABLE `project_vehicles` (
+  `id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `vehicle_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `project_vehicles`
+--
+
+INSERT INTO `project_vehicles` (`id`, `project_id`, `vehicle_id`, `created_at`) VALUES
+(17, 75, 1, '2025-05-04 13:55:05'),
+(18, 76, 3, '2025-05-04 14:35:41'),
+(19, 77, 4, '2025-05-04 22:59:22');
 
 -- --------------------------------------------------------
 
@@ -143,7 +209,7 @@ INSERT INTO `projects` (`id`, `title`, `manager`, `person_in_charge`, `tools_equ
 --
 
 CREATE TABLE `tools` (
-  `id` int(11) NOT NULL,
+  `tool_id` int(11) NOT NULL,
   `picture` varchar(255) DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `brand` varchar(50) DEFAULT NULL,
@@ -162,42 +228,29 @@ CREATE TABLE `tools` (
 -- Dumping data for table `tools`
 --
 
-INSERT INTO `tools` (`id`, `picture`, `name`, `brand`, `category`, `tag`, `description`, `purchase_date`, `warranty`, `status`, `remarks`, `qr`, `qr_code_id`) VALUES
-(1, '1745821307732-503816072.jpg', 'Contender Welding Machine', 'Contender', 'Welding Machine', 'POWER-WLDGM_CONTNDR-1', 'Input Voltage, 220. Maximum Rod Diameter, 4.0 mm. Rated Input Capacity, 10.2', '2025-03-31', '2026-04-27', 'Issued Out', 'Brand New', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4.png', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4'),
-(2, '1745821628548-538938628.jpg', 'Dartek Angle Grinder', 'Dartek', 'Angle Grinder', 'POWER-ANGLGRNDR_DARTEK-1', 'Rated Input Power, 760W. No-Load Speed, 11500r/min. Max Wheel Diameter, 100mm. Hole Diameter of Wheel, 16mm.', '2025-03-31', '2025-04-24', 'Available', 'Brand New', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c.png', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c'),
-(3, '1745821790372-377372672.jpg', 'Megaman Floodlight ', 'Megaman', 'Light', 'POWER-FLDLIGHT_MGMN-1', '0W 840 IP66 IK08. 711433 ; FL TITO 90W 840 IP66 IK08. 710825 ; FL TITO 120W 840 IP66 IK08.', '2025-04-01', '2049-04-13', 'Available', 'Brand New', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21.png', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21'),
+INSERT INTO `tools` (`tool_id`, `picture`, `name`, `brand`, `category`, `tag`, `description`, `purchase_date`, `warranty`, `status`, `remarks`, `qr`, `qr_code_id`) VALUES
+(1, '1745821307732-503816072.jpg', 'Contender Welding Machine', 'Contender', 'Welding Machine', 'POWER-WLDGM_CONTNDR-1', 'Input Voltage, 220. Maximum Rod Diameter, 4.0 mm. Rated Input Capacity, 10.2', '2025-03-31', '2026-04-27', 'Reserved', 'Brand New', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4.png', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4'),
+(2, '1745821628548-538938628.jpg', 'Dartek Angle Grinder', 'Dartek', 'Angle Grinder', 'POWER-ANGLGRNDR_DARTEK-1', 'Rated Input Power, 760W. No-Load Speed, 11500r/min. Max Wheel Diameter, 100mm. Hole Diameter of Wheel, 16mm.', '2025-03-31', '2025-04-24', 'Reserved', 'Brand New', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c.png', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c'),
+(3, '1745821790372-377372672.jpg', 'Megaman Floodlight ', 'Megaman', 'Light', 'POWER-FLDLIGHT_MGMN-1', '0W 840 IP66 IK08. 711433 ; FL TITO 90W 840 IP66 IK08. 710825 ; FL TITO 120W 840 IP66 IK08.', '2025-04-01', '2049-04-13', 'Issued-out', 'Brand New', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21.png', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21'),
 (4, '1745821991819-726796547.jpg', 'Makita Nail Gun', 'Makita', 'Nail Gun', 'POWER-NAILGUN_MKTA-1', 'Nail size capacity: 10-50mm (19/32\"-2\") Nail type: F15-F50 Gauge: 18 Operating pressure: 60-100psi', '2025-03-31', '2027-04-07', 'Available', 'Brand New', 'TOOL-344ede88-66df-4571-adca-79450032c487.png', 'TOOL-344ede88-66df-4571-adca-79450032c487'),
-(5, '1745822173903-752629888.jpg', 'Welding Mask', 'Generic', 'Welding Mask', 'OTHERS-WLDGMASK-1', 'equipped with #12 Dark Glass for safety', '2025-03-31', '2025-04-08', 'Available', 'Brand New', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760.png', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760'),
-(14, '1745999669151-570661796.jpg', 'Makita Angle Grinder ', 'makita', 'Grinder', '123456', 'test', '2025-03-29', '2025-05-02', 'Available', 'Brand New', 'TOOL-5f96b978-7e02-4e8d-aa2e-a050e3d8d55b.png', 'TOOL-5f96b978-7e02-4e8d-aa2e-a050e3d8d55b'),
-(16, '1746078294187-911809950.png', 'Avanza', 'gbkhj', 'QWE', 'ANG-404', 'test', '2025-04-30', '2025-05-01', 'Available', 'sasa', 'TOOL-cf1fd1d3-b06c-47b3-9d8b-9ee8aa373845.png', 'TOOL-cf1fd1d3-b06c-47b3-9d8b-9ee8aa373845'),
-(17, '1746088378769-830196118.png', 'Sample', 'ewan', 'EWAM', 'ASDASD', 'SADSA', '2025-04-30', '2025-05-01', 'Available', 'SADAS', 'TOOL-86329937-c828-4809-805b-bb529afd88fd.png', 'TOOL-86329937-c828-4809-805b-bb529afd88fd');
+(5, '1745822173903-752629888.jpg', 'Welding Mask', 'Generic', 'Welding Mask', 'OTHERS-WLDGMASK-1', 'equipped with #12 Dark Glass for safety', '2025-03-31', '2025-04-08', 'Available', 'Brand New', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760.png', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tools_logs`
+-- Table structure for table `tools_log`
 --
 
-CREATE TABLE `tools_logs` (
-  `id` int(11) NOT NULL,
-  `tool_tag` varchar(100) DEFAULT NULL,
-  `tool_name` varchar(255) DEFAULT NULL,
-  `performed_by` varchar(255) DEFAULT NULL,
-  `location` varchar(255) DEFAULT NULL,
-  `issued_date` datetime DEFAULT NULL,
-  `status` varchar(50) DEFAULT NULL
+CREATE TABLE `tools_log` (
+  `log_id` int(11) NOT NULL,
+  `tool_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `project_location` varchar(255) NOT NULL,
+  `tool_tag` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  `peformed_by` varchar(255) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `tools_logs`
---
-
-INSERT INTO `tools_logs` (`id`, `tool_tag`, `tool_name`, `performed_by`, `location`, `issued_date`, `status`) VALUES
-(50, NULL, 'Contender Welding Machine', 'NOBODY', NULL, '2025-05-02 00:22:36', 'Issued Out'),
-(51, NULL, 'Contender Welding Machine', 'NOBODY', 'MAKATI', '2025-05-02 00:23:08', 'Returned'),
-(52, NULL, 'Dartek Angle Grinder', 'hello', NULL, '2025-05-02 00:26:35', 'Issued Out'),
-(53, NULL, 'Dartek Angle Grinder', 'hello', 'hello', '2025-05-02 00:26:42', 'Returned'),
-(54, NULL, 'Contender Welding Machine', 'sample', NULL, '2025-05-02 00:32:08', 'Issued Out');
 
 -- --------------------------------------------------------
 
@@ -242,7 +295,7 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `profile`, `stat
 --
 
 CREATE TABLE `vehicles` (
-  `id` int(11) NOT NULL,
+  `vehicle_id` int(11) NOT NULL,
   `picture` varchar(255) DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `brand` varchar(100) DEFAULT NULL,
@@ -264,14 +317,12 @@ CREATE TABLE `vehicles` (
 -- Dumping data for table `vehicles`
 --
 
-INSERT INTO `vehicles` (`id`, `picture`, `name`, `brand`, `plate_no`, `category`, `fuel_type`, `location`, `acquisition_date`, `status`, `remarks`, `maintenance_due`, `assigned_driver`, `qr`, `warranty`, `qr_code_id`) VALUES
-(1, '1745827381363-558391668.jpg', 'Hino Dump Truck', 'Hino Motors', 'DMP-2345', 'Dump Truck', 'Diesel', 'Yar Main', '2021-04-13', 'Issued Out', 'Needs Maintenance', '2025-04-25', 'Nolly Alvarado', 'VEHICLE-8e8b067a-1351-44e1-adf1-7b0e2741a2cb.png', '2025-04-22', 'VEHICLE-8e8b067a-1351-44e1-adf1-7b0e2741a2cb'),
+INSERT INTO `vehicles` (`vehicle_id`, `picture`, `name`, `brand`, `plate_no`, `category`, `fuel_type`, `location`, `acquisition_date`, `status`, `remarks`, `maintenance_due`, `assigned_driver`, `qr`, `warranty`, `qr_code_id`) VALUES
+(1, '1745827381363-558391668.jpg', 'Hino Dump Truck', 'Hino Motors', 'DMP-2345', 'Dump Truck', 'Diesel', 'Yar Main', '2021-04-13', 'Reserved', 'Needs Maintenance', '2025-04-25', 'Nolly Alvarado', 'VEHICLE-8e8b067a-1351-44e1-adf1-7b0e2741a2cb.png', '2025-04-22', 'VEHICLE-8e8b067a-1351-44e1-adf1-7b0e2741a2cb'),
 (2, '1745827714814-712914986.jpg', 'Isuzu Giga Crane Truck', 'Isuzu', 'CRN-6789', 'Crane Truck', 'Diesel', 'Yar Main', '2025-04-27', 'Available', 'Brand New', '2025-05-27', 'Angelo Padilla', 'VEHICLE-50ed45fc-4dc9-44d0-8682-a8f523bea291.png', '2026-04-27', 'VEHICLE-50ed45fc-4dc9-44d0-8682-a8f523bea291'),
-(3, '1745827872146-579794368.jpg', 'Mitsubishi Fuso Water Tanker', 'Mitsubishi', 'WTK-1122', 'Tanker Truck', 'Diesel', 'Main Warehouse', '2025-04-07', 'Available', 'Change oil nyo ya', '2025-08-25', 'Jestro Maverick De Castro', 'VEHICLE-dc79ceea-11ad-49c6-9722-f55416ca149e.png', '2027-04-12', 'VEHICLE-dc79ceea-11ad-49c6-9722-f55416ca149e'),
-(4, '1745827984739-89621926.jpg', 'Hyundai HD320 Flatbed Truck', 'Hyundai', 'FLT-7788', 'Flatbed Truck', 'Diesel', 'Main Warehouse', '2023-04-11', 'Available', 'Brake is a bit off', '2025-09-04', 'Edan Raymunmo', 'VEHICLE-a3ff6853-4af3-4dc9-aceb-9a8470790dc2.png', '2028-04-27', 'VEHICLE-a3ff6853-4af3-4dc9-aceb-9a8470790dc2'),
-(5, '1745828075830-924813918.jpg', 'Foton Tornado Tipper Truck', 'Foton', 'TPR-3344', 'Tipper Truck', 'Diesel', 'Main Warehouse', '2025-04-17', 'Available', 'Needs to change oil', '2025-09-29', 'Ronald Labrado', 'VEHICLE-f56a2adf-3b71-4820-b9ab-e0d5bef22288.png', '2026-04-13', 'VEHICLE-f56a2adf-3b71-4820-b9ab-e0d5bef22288'),
-(11, '1745987469099-997815354.jpg', 'testvec', 'testt', '123456789', 'qwertyui', 'Diesel', ' manila', '2025-04-10', 'Available', 'testtt', '2025-04-21', 'wertyuiop', 'VEHICLE-784f508b-f14e-4922-b01c-7efd6fb44a0a.png', '2025-04-30', 'VEHICLE-784f508b-f14e-4922-b01c-7efd6fb44a0a'),
-(12, '1746088473513-123280844.png', 'ronadl', 'ronald', 'ronald', 'ronald', 'Gasoline', ' ASDSA', '2025-04-30', 'Available', 'sdsa', '2025-05-01', 'wertyuiop', 'VEHICLE-bcab0f21-0972-4c48-bcbc-626a6b070968.png', '2025-05-01', 'VEHICLE-bcab0f21-0972-4c48-bcbc-626a6b070968');
+(3, '1745827872146-579794368.jpg', 'Mitsubishi Fuso Water Tanker', 'Mitsubishi', 'WTK-1122', 'Tanker Truck', 'Diesel', 'Main Warehouse', '2025-04-07', 'Reserved', 'Change oil nyo ya', '2025-08-25', 'Jestro Maverick De Castro', 'VEHICLE-dc79ceea-11ad-49c6-9722-f55416ca149e.png', '2027-04-12', 'VEHICLE-dc79ceea-11ad-49c6-9722-f55416ca149e'),
+(4, '1745827984739-89621926.jpg', 'Hyundai HD320 Flatbed Truck', 'Hyundai', 'FLT-7788', 'Flatbed Truck', 'Diesel', 'Main Warehouse', '2023-04-11', 'Issued-out', 'Brake is a bit off', '2025-09-04', 'Edan Raymunmo', 'VEHICLE-a3ff6853-4af3-4dc9-aceb-9a8470790dc2.png', '2028-04-27', 'VEHICLE-a3ff6853-4af3-4dc9-aceb-9a8470790dc2'),
+(5, '1745828075830-924813918.jpg', 'Foton Tornado Tipper Truck', 'Foton', 'TPR-3344', 'Tipper Truck', 'Diesel', 'Main Warehouse', '2025-04-17', 'Available', 'Needs to change oil', '2025-09-29', 'Ronald Labrado', 'VEHICLE-f56a2adf-3b71-4820-b9ab-e0d5bef22288.png', '2026-04-13', 'VEHICLE-f56a2adf-3b71-4820-b9ab-e0d5bef22288');
 
 -- --------------------------------------------------------
 
@@ -312,7 +363,7 @@ ALTER TABLE `categories`
 -- Indexes for table `consumables`
 --
 ALTER TABLE `consumables`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`consumable_id`);
 
 --
 -- Indexes for table `consumables_logs`
@@ -324,19 +375,44 @@ ALTER TABLE `consumables_logs`
 -- Indexes for table `projects`
 --
 ALTER TABLE `projects`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`project_id`);
+
+--
+-- Indexes for table `project_consumables`
+--
+ALTER TABLE `project_consumables`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `project_id` (`project_id`),
+  ADD KEY `consumable_id` (`consumable_id`);
+
+--
+-- Indexes for table `project_tools`
+--
+ALTER TABLE `project_tools`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `project_id` (`project_id`),
+  ADD KEY `tool_id` (`tool_id`);
+
+--
+-- Indexes for table `project_vehicles`
+--
+ALTER TABLE `project_vehicles`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `project_id` (`project_id`),
+  ADD KEY `vehicle_id` (`vehicle_id`);
 
 --
 -- Indexes for table `tools`
 --
 ALTER TABLE `tools`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`tool_id`);
 
 --
--- Indexes for table `tools_logs`
+-- Indexes for table `tools_log`
 --
-ALTER TABLE `tools_logs`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `tools_log`
+  ADD PRIMARY KEY (`log_id`),
+  ADD KEY `tool_id` (`tool_id`);
 
 --
 -- Indexes for table `users`
@@ -348,7 +424,7 @@ ALTER TABLE `users`
 -- Indexes for table `vehicles`
 --
 ALTER TABLE `vehicles`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`vehicle_id`);
 
 --
 -- Indexes for table `vehicles_logs`
@@ -370,7 +446,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `consumables`
 --
 ALTER TABLE `consumables`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `consumable_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `consumables_logs`
@@ -382,19 +458,37 @@ ALTER TABLE `consumables_logs`
 -- AUTO_INCREMENT for table `projects`
 --
 ALTER TABLE `projects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=110;
+  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+
+--
+-- AUTO_INCREMENT for table `project_consumables`
+--
+ALTER TABLE `project_consumables`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `project_tools`
+--
+ALTER TABLE `project_tools`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+
+--
+-- AUTO_INCREMENT for table `project_vehicles`
+--
+ALTER TABLE `project_vehicles`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `tools`
 --
 ALTER TABLE `tools`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `tool_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `tools_logs`
+-- AUTO_INCREMENT for table `tools_log`
 --
-ALTER TABLE `tools_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+ALTER TABLE `tools_log`
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -406,13 +500,44 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `vehicles`
 --
 ALTER TABLE `vehicles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `vehicle_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `vehicles_logs`
 --
 ALTER TABLE `vehicles_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `project_consumables`
+--
+ALTER TABLE `project_consumables`
+  ADD CONSTRAINT `project_consumables_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `project_consumables_ibfk_2` FOREIGN KEY (`consumable_id`) REFERENCES `consumables` (`consumable_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `project_tools`
+--
+ALTER TABLE `project_tools`
+  ADD CONSTRAINT `project_tools_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `project_tools_ibfk_2` FOREIGN KEY (`tool_id`) REFERENCES `tools` (`tool_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `project_vehicles`
+--
+ALTER TABLE `project_vehicles`
+  ADD CONSTRAINT `project_vehicles_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `project_vehicles_ibfk_2` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles` (`vehicle_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tools_log`
+--
+ALTER TABLE `tools_log`
+  ADD CONSTRAINT `tools_log_ibfk_1` FOREIGN KEY (`tool_id`) REFERENCES `tools` (`tool_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
