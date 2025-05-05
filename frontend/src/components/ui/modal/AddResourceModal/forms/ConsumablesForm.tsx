@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
@@ -7,20 +7,44 @@ import { Upload } from "lucide-react";
 type ConsumableFormProps = {
   onClose: () => void;
   onAddSuccess: () => void;
+  addedBy: string;
+  consumableToEdit?: any; // Replace with proper type if available
 };
 
-const ConsumableForm: React.FC<ConsumableFormProps> = ({ onClose, onAddSuccess }) => {
+const ConsumableForm: React.FC<ConsumableFormProps> = ({
+  onClose,
+  onAddSuccess,
+  addedBy,
+  consumableToEdit,
+}) => {
   const [formData, setFormData] = useState({
     picture: null as File | null,
-    tag: " ",
-    name: " ",
-    category: " ",
+    existingPicture: "",
+    tag: "",
+    name: "",
+    category: "",
     quantity: "",
     minStock: "",
-    unit: " ",
-    location: " ",
+    unit: "",
+    location: "",
   });
- 
+
+  useEffect(() => {
+    if (consumableToEdit) {
+      setFormData({
+        picture: null,
+        existingPicture: consumableToEdit.picture || "",
+        tag: consumableToEdit.tag || "",
+        name: consumableToEdit.name || "",
+        category: consumableToEdit.category || "",
+        quantity: consumableToEdit.quantity?.toString() || "",
+        minStock: consumableToEdit.minStock?.toString() || "",
+        unit: consumableToEdit.unit || "",
+        location: consumableToEdit.location || "",
+      });
+    }
+  }, [consumableToEdit]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -32,6 +56,8 @@ const ConsumableForm: React.FC<ConsumableFormProps> = ({ onClose, onAddSuccess }
     form.append("minStock", formData.minStock);
     form.append("unit", formData.unit);
     form.append("location", formData.location);
+    form.append("added_by", addedBy);
+    form.append("existingPicture", formData.existingPicture); 
 
 
     if (formData.picture) {
@@ -40,23 +66,29 @@ const ConsumableForm: React.FC<ConsumableFormProps> = ({ onClose, onAddSuccess }
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/consumables`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/consumables${
+          consumableToEdit ? `/${consumableToEdit.consumable_id}` : ""
+        }`,
         {
-          method: "POST",
+          method: consumableToEdit ? "PUT" : "POST",
           body: form,
         }
       );
 
       if (response.ok) {
-        toast.success("Consumable added successfully!");
+        toast.success(
+          consumableToEdit
+            ? "Consumable updated successfully!"
+            : "Consumable added successfully!"
+        );
         onAddSuccess();
         onClose();
       } else {
-        toast.error("Failed to add consumable");
+        toast.error("Failed to save consumable");
       }
     } catch (error) {
-      console.error("Error adding consumable", error);
-      toast.error("Error adding consumable");
+      console.error("Error saving consumable", error);
+      toast.error("Error saving consumable");
     }
   };
 
@@ -78,7 +110,6 @@ const ConsumableForm: React.FC<ConsumableFormProps> = ({ onClose, onAddSuccess }
       }));
     }
   };
-
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
       {/* Name */}
@@ -214,12 +245,12 @@ const ConsumableForm: React.FC<ConsumableFormProps> = ({ onClose, onAddSuccess }
 
       {/* Submit Button */}
       <div className="col-span-3 text-right mt-4 ">
-        <button
-          type="submit"
-          className="px-5 py-2 mr-2 bg-blue-800 text-white text-xs rounded-md hover:bg-blue-700 transition"
-        >
-          Add
-        </button>
+      <button
+  type="submit"
+  className="px-5 py-2 mr-2 bg-blue-800 text-white text-xs rounded-md hover:bg-blue-700 transition"
+>
+  {consumableToEdit ? "Update" : "Add"}
+</button>
         <button
           type="button"
           onClick={onClose}

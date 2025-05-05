@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DatePicker from "react-datepicker";
@@ -8,9 +8,10 @@ import { Upload } from "lucide-react";
 type VehicleFormProps = {
   onClose: () => void;
   onAddSuccess: () => void;
+  vehicleToEdit?: any;
 };
 
-const ToolForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess }) => {
+const VehicleForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess, vehicleToEdit }) => {
   const [formData, setFormData] = useState({
     picture: null as File | null,
     name: "",
@@ -24,7 +25,21 @@ const ToolForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess }) => {
     maintenance_due: null as Date | null,
     remarks: "",
     assigned_driver: "",
+    status: "Available",
   });
+
+ 
+  useEffect(() => {
+    if (vehicleToEdit) {
+      setFormData({
+        ...vehicleToEdit,
+        picture: null,
+        acquisition_date: vehicleToEdit.acquisition_date ? new Date(vehicleToEdit.acquisition_date) : null,
+        warranty: vehicleToEdit.warranty ? new Date(vehicleToEdit.warranty) : null,
+        maintenance_due: vehicleToEdit.maintenance_due ? new Date(vehicleToEdit.maintenance_due) : null,
+      });
+    }
+  }, [vehicleToEdit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,12 +53,10 @@ const ToolForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess }) => {
     form.append("location", formData.location);
     form.append("remarks", formData.remarks);
     form.append("assigned_driver", formData.assigned_driver);
+    form.append("status", formData.status);
 
     if (formData.acquisition_date) {
-      form.append(
-        "acquisition_date",
-        formData.acquisition_date.toISOString().split("T")[0]
-      );
+      form.append("acquisition_date", formData.acquisition_date.toISOString().split("T")[0]);
     }
 
     if (formData.warranty) {
@@ -51,46 +64,60 @@ const ToolForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess }) => {
     }
 
     if (formData.maintenance_due) {
-      form.append(
-        "maintenance_due",
-        formData.maintenance_due.toISOString().split("T")[0]
-      );
+      form.append("maintenance_due", formData.maintenance_due.toISOString().split("T")[0]);
     }
 
     if (formData.picture) {
       form.append("picture", formData.picture);
+    } else if (vehicleToEdit?.picture) {
+      form.append("existing_picture", vehicleToEdit.picture);
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/vehicles`,
-        {
-          method: "POST",
-          body: form,
-        }
-      );
+      const apiUrl = vehicleToEdit
+        ? `${import.meta.env.VITE_API_BASE_URL}/api/vehicles/${vehicleToEdit.id}`
+        : `${import.meta.env.VITE_API_BASE_URL}/api/vehicles`;
+      const method = vehicleToEdit ? "PUT" : "POST";
+
+      const response = await fetch(apiUrl, {
+        method,
+        body: form,
+      });
 
       if (response.ok) {
-        toast.success("Vehicle added successfully!");
+        toast.success(vehicleToEdit ? "Vehicle updated successfully!" : "Vehicle added successfully!");
         onAddSuccess();
         onClose();
       } else {
-        toast.error("Failed to add vehicle");
+        toast.error("Failed to save vehicle");
       }
     } catch (error) {
-      console.error("Error adding vehicle", error);
-      toast.error("Error adding vehicle");
+      console.error("Error saving vehicle", error);
+      toast.error("Error saving vehicle");
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    setFormData((prevData) => {
+      let updatedStatus = prevData.status;
+
+      if (name === "remarks") {
+        const val = value.toLowerCase();
+        if (val.includes("need maintenance")) {
+          updatedStatus = "Not Available";
+        } else if (val.includes("repaired done")) {
+          updatedStatus = "Available";
+        }
+      }
+
+      return {
+        ...prevData,
+        [name]: value,
+        status: updatedStatus,
+      };
+    });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,8 +127,7 @@ const ToolForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess }) => {
         picture: e.target.files![0],
       }));
     }
-  };
-
+  }
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
       {/* Name */}
@@ -318,7 +344,8 @@ const ToolForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess }) => {
           type="submit"
           className="px-5 py-2 mr-2 bg-blue-800 text-white text-xs rounded-md hover:bg-blue-700 transition"
         >
-          Add
+       {vehicleToEdit ? "Update" : "Add"}
+
         </button>
         <button
           type="button"
@@ -332,4 +359,4 @@ const ToolForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess }) => {
   );
 };
 
-export default ToolForm;
+export default VehicleForm;

@@ -86,7 +86,6 @@ const addTool = async (toolData) => {
 // UPDATE
 const updateTool = async (toolData) => {
   const {
-    picture,
     name,
     brand,
     category,
@@ -100,14 +99,21 @@ const updateTool = async (toolData) => {
   } = toolData;
 
   const query = `
-        UPDATE tools SET picture = ?, name = ?, brand = ?, category = ?, tag = ?,
-        description = ?, purchase_date = ?, warranty = ?, status = ?, remarks = ?
-        WHERE tool_id = ?
-    `;
+    UPDATE tools SET 
+      name = ?, 
+      brand = ?, 
+      category = ?, 
+      tag = ?, 
+      description = ?, 
+      purchase_date = ?, 
+      warranty = ?, 
+      status = ?, 
+      remarks = ?, 
+    WHERE tool_id = ?
+  `;
 
   try {
     const [result] = await db.query(query, [
-      picture,
       name,
       brand,
       category,

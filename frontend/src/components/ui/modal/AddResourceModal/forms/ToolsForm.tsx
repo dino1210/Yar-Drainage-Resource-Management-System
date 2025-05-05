@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DatePicker from "react-datepicker";
@@ -8,9 +9,14 @@ import { Upload } from "lucide-react";
 type ToolFormProps = {
   onClose: () => void;
   onAddSuccess: () => void;
+  toolToEdit?: any;
 };
 
-const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
+const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }) => {
+  useEffect(() => {
+    console.log(" Current USER from localStorage:", localStorage.getItem("username"));
+  }, []);
+
   const [formData, setFormData] = useState({
     picture: null as File | null,
     name: "",
@@ -21,7 +27,21 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
     purchase_date: null as Date | null,
     warranty: null as Date | null,
     remarks: "",
+    status: "Available",
   });
+
+  useEffect(() => {
+    if (toolToEdit) {
+      setFormData({
+        ...toolToEdit,
+        picture: null,
+        purchase_date: toolToEdit.purchase_date ? new Date(toolToEdit.purchase_date) : null,
+        warranty: toolToEdit.warranty ? new Date(toolToEdit.warranty) : null,
+      });
+    }
+  }, [toolToEdit]);
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +53,14 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
     form.append("tag", formData.tag);
     form.append("description", formData.description);
     form.append("remarks", formData.remarks);
+    form.append("status", formData.status);
+    const actualUser = localStorage.getItem("username") || "Unknown";
+    console.log(" Username from localStorage:", actualUser);
+    form.append("added_by", actualUser);
+
+
+
+
 
     if (formData.purchase_date) {
       form.append(
@@ -45,18 +73,24 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
       form.append("warranty", formData.warranty.toISOString().split("T")[0]);
     }
 
+
     if (formData.picture) {
       form.append("picture", formData.picture);
+    } else if (toolToEdit?.picture) {
+      form.append("existing_picture", toolToEdit.picture);
     }
-
+    
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/tools/`,
-        {
-          method: "POST",
-          body: form,
-        }
-      );
+      const apiUrl = toolToEdit
+        ? `${import.meta.env.VITE_API_BASE_URL}/api/tools/${toolToEdit.tool_id}`
+        : `${import.meta.env.VITE_API_BASE_URL}/api/tools/`;
+
+      const method = toolToEdit ? "PUT" : "POST";
+
+      const response = await fetch(apiUrl, {
+        method,
+        body: form,
+      });
 
       if (response.ok) {
         toast.success("Tool added successfully!");
@@ -70,16 +104,31 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
       toast.error("Error adding tool");
     }
   };
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    setFormData((prevData) => {
+      let updatedStatus = prevData.status;
+
+      if (name === "remarks") {
+        const val = value.toLowerCase();
+        if (val.includes("need maintenance")) {
+          updatedStatus = "Not Available";
+        } else if (val.includes("repaired done")) {
+          updatedStatus = "Available";
+        }
+      }
+
+      return {
+        ...prevData,
+        [name]: value,
+        status: updatedStatus,
+      };
+    });
   };
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -92,7 +141,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
-      {/* Name */}
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Name
@@ -107,7 +155,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
         />
       </div>
 
-      {/* Brand */}
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Brand
@@ -122,7 +169,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
         />
       </div>
 
-      {/* Category */}
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Category
@@ -137,7 +183,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
         />
       </div>
 
-      {/* Tag/Code */}
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Tag/Code
@@ -152,7 +197,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
         />
       </div>
 
-      {/* Description */}
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Description
@@ -166,7 +210,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
         />
       </div>
 
-      {/* Date of Purchase */}
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Date of Purchase
@@ -190,7 +233,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
         />
       </div>
 
-      {/* Warranty */}
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Warranty
@@ -213,7 +255,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
         />
       </div>
 
-      {/* Remarks */}
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Remarks
@@ -227,8 +268,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
         />
       </div>
 
-      {/* Image */}
-      {/* Image Upload */}
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Image
@@ -245,14 +284,14 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess }) => {
         </label>
       </div>
 
-      {/* Submit Button */}
       <div className="col-span-3 text-right mt-4 ">
         <button
           type="submit"
           className="px-5 py-2 mr-2 bg-blue-800 text-white text-xs rounded-md hover:bg-blue-700 transition"
         >
-          Add
+          {toolToEdit ? "Update" : "Add"}
         </button>
+
         <button
           type="button"
           onClick={onClose}

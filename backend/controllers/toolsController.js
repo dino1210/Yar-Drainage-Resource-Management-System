@@ -35,10 +35,10 @@ const deleteTool = async (req, res) => {
 
 // Update Tool
 const updateTool = async (req, res) => {
-  const toolId = req.params.id;
+  const toolId = req.params.tool_id;
   const toolData = {
     ...req.body,
-    id: toolId,
+    tool_id: toolId,
     picture: req.file ? req.file.filename : req.body.picture,
   };
 

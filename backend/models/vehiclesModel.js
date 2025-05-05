@@ -79,7 +79,6 @@ const addVehicle = async (vehicleData) => {
 const updateVehicle = async (vehicleData) => {
   const {
     vehicle_id,
-    picture,
     name,
     brand,
     plate_no,
@@ -92,18 +91,20 @@ const updateVehicle = async (vehicleData) => {
     maintenance_due,
     assigned_driver,
     qr,
+    qr_code_id, // Make sure this is included in the data
   } = vehicleData;
 
   const query = `
-        UPDATE vehicles SET picture = ?, name = ?, brand = ?, plate_no = ?, category = ?, 
-        fuel_type = ?, location = ?, acquisition_date = ?, status = ?, remarks = ?, maintenance_due = ?, 
-        assigned_driver = ?, qr = ?, qr_code_id
-        WHERE vehicle_id = ?
-    `;
+    UPDATE vehicles SET 
+      name = ?, brand = ?, plate_no = ?, category = ?, 
+      fuel_type = ?, location = ?, acquisition_date = ?, status = ?, 
+      remarks = ?, maintenance_due = ?, assigned_driver = ?, 
+      qr = ?, qr_code_id = ?
+    WHERE vehicle_id = ?
+  `;
 
   try {
     const [result] = await db.query(query, [
-      picture,
       name,
       brand,
       plate_no,
@@ -116,6 +117,7 @@ const updateVehicle = async (vehicleData) => {
       maintenance_due,
       assigned_driver,
       qr,
+      qr_code_id, // This was missing in the original query
       vehicle_id,
     ]);
 
@@ -124,6 +126,7 @@ const updateVehicle = async (vehicleData) => {
     throw new Error("Error updating vehicle: " + err.message);
   }
 };
+
 
 // DELETE
 const deleteVehicle = async (vehicleID) => {

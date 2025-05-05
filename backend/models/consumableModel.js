@@ -27,12 +27,12 @@ const deleteConsumable = async (consumableID) => {
 
 // UPDATE
 const updateConsumable = async (consumableData) => {
-    const { picture, tag, name, category, quantity, minStock, unit, location, status, qr, id } = consumableData;
-    const query = `UPDATE consumables SET picture = ?, tag = ?, name = ?, category = ?, quantity = ?, minStock = ?, unit = ?, location = ?, status = ?, qr = ? WHERE consumable_id = ?`;
+    const { tag, name, category, quantity, minStock, unit, location, status, qr, consumable_id } = consumableData;
+    const query = `UPDATE consumables SET tag = ?, name = ?, category = ?, quantity = ?, minStock = ?, unit = ?, location = ?, qr = ? WHERE consumable_id = ?`;
 
 
     try {
-        const [result] = await db.query(query, [picture, tag, name, category, quantity, minStock, unit, location, status, qr, id]);
+        const [result] = await db.query(query, [tag, name, category, quantity, minStock, unit, location, qr, consumable_id]);
         return result;
     } catch (err) {
         throw new Error('Error updating consumable: ' + err.message);

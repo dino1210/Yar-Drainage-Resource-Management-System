@@ -8,6 +8,7 @@ import {
 } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
 import {
+
   Pencil,
   Trash2,
   RotateCcw,
@@ -47,8 +48,23 @@ interface Category {
   category_name: string;
   category_type: string;
 }
-
 export default function ToolsAndEquipmentsTable() {
+  const [currentUser, setCurrentUser] = useState("Unknown");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("username");
+    if (storedUser) {
+      setCurrentUser(storedUser);
+      console.log(" LOGGED-IN USER:", storedUser);
+    } else {
+      console.log("NO USER FOUND IN localStorage");
+    }
+  }, []);
+
+
+
+
+
   const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -63,10 +79,14 @@ export default function ToolsAndEquipmentsTable() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedName, setSelectedName] = useState<string>("");
+  const [toolToEdit, setToolToEdit] = useState<Tool | null>(null);
 
-  const handleOpenModal = () => {
+
+  const handleOpenModal = (tool?: Tool) => {
+    setToolToEdit(tool || null);
     setIsModalOpen(true);
   };
+
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -123,7 +143,12 @@ export default function ToolsAndEquipmentsTable() {
       });
   }, []);
 
+
+
+
   if (loading) return <p>Loading...</p>;
+
+
 
   const handleAddSuccess = () => {
     fetchTools();
@@ -209,7 +234,8 @@ export default function ToolsAndEquipmentsTable() {
           <Funnel className="w-auto h-5" />
         </button>
         <button
-          onClick={handleOpenModal}
+          onClick={() => handleOpenModal(undefined)} // ✅ Call with undefined for "New" mode
+
           type="button"
           className="flex items-center gap-2 px-2 text-xs rounded-md bg-white dark:bg-blue-800 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
         >
@@ -221,6 +247,8 @@ export default function ToolsAndEquipmentsTable() {
           onClose={handleCloseModal}
           onAddSuccess={handleAddSuccess}
           resourceType="Tool"
+          addedBy={currentUser}
+          toolToEdit={toolToEdit}
         />
       </div>
       <div className="max-w-full overflow-x-auto">
@@ -264,15 +292,13 @@ export default function ToolsAndEquipmentsTable() {
                   <TableRow key={tool.tool_id}>
                     <TableCell className="px-5 py-4 sm:px-6 text-center">
                       <img
-                        src={`${
-                          import.meta.env.VITE_API_BASE_URL
-                        }/assets/images/tools/${tool.picture}`}
+                        src={`${import.meta.env.VITE_API_BASE_URL
+                          }/assets/images/tools/${tool.picture}`}
                         alt={`${tool.name}' Image`}
                         className="w-16 h-16 rounded-lg object-cover cursor-pointer border border-gray-300"
                         onClick={() =>
                           setSelectedImage(
-                            `${
-                              import.meta.env.VITE_API_BASE_URL
+                            `${import.meta.env.VITE_API_BASE_URL
                             }/assets/images/tools/${tool.picture}`
                           )
                         }
@@ -310,22 +336,22 @@ export default function ToolsAndEquipmentsTable() {
                     <TableCell className="px-4 py-3 text-gray-500 text-theme-xs text-center dark:text-gray-400">
                       {tool.warranty
                         ? new Date(tool.purchase_date).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )
                         : "-"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-theme-xs text-center dark:text-gray-400">
                       {tool.warranty
                         ? new Date(tool.warranty).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
                         : "-"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-theme-xs text-center dark:text-gray-400">
@@ -347,15 +373,13 @@ export default function ToolsAndEquipmentsTable() {
                     </TableCell> */}
                     <TableCell className="px-4 py-3 text-gray-500 text-theme-xs text-center dark:text-gray-400">
                       <img
-                        src={`${
-                          import.meta.env.VITE_API_BASE_URL
-                        }/assets/qr/tools/${tool.qr}`}
+                        src={`${import.meta.env.VITE_API_BASE_URL
+                          }/assets/qr/tools/${tool.qr}`}
                         alt={`${tool.name}' Image`}
                         className="w-auto h-15 mx-auto rounded-lg object-cover cursor-pointer"
                         onClick={() =>
                           setSelectedImage(
-                            `${
-                              import.meta.env.VITE_API_BASE_URL
+                            `${import.meta.env.VITE_API_BASE_URL
                             }/assets/qr/tools/${tool.qr}`
                           )
                         }
@@ -364,11 +388,13 @@ export default function ToolsAndEquipmentsTable() {
                     <TableCell className="px-8 py-3 text-xs text-gray-500 dark:text-gray-400 text-center">
                       <div className="flex items-center justify-center space-x-2 w-full h-full">
                         <button
+                          onClick={() => handleOpenModal(tool)} 
                           className="px-3 py-1 text-xs font-medium text-white bg-blue-800 rounded-lg hover:bg-blue-900"
                           title="Edit"
                         >
                           <Pencil className="w-3 h-7" />
                         </button>
+
                         <button
                           onClick={() =>
                             handleOpenDeleteModal(tool.tool_id, tool.name)
@@ -427,11 +453,10 @@ export default function ToolsAndEquipmentsTable() {
             <button
               key={index}
               onClick={() => setCurrentPage(index + 1)}
-              className={`px-3 py-2 text-xs font-medium ${
-                currentPage === index + 1
+              className={`px-3 py-2 text-xs font-medium ${currentPage === index + 1
                   ? "bg-blue-700 text-white"
                   : "bg-white text-blue-700"
-              } border px-3 py-2 text-xs rounded-md bg-white dark:bg-gray-900 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400 dark:hover:bg-gray-800`}
+                } border px-3 py-2 text-xs rounded-md bg-white dark:bg-gray-900 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400 dark:hover:bg-gray-800`}
             >
               {index + 1}
             </button>

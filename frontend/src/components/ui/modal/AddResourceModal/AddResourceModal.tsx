@@ -7,25 +7,32 @@ type AddResourceModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onAddSuccess: () => void;
-  resourceType: string; 
+  resourceType: string;
+  addedBy: string;
+  toolToEdit?: any; 
+  vehicleToEdit?: any; 
+  consumableToEdit?: any; 
 };
-
 
 const AddResourceModal: React.FC<AddResourceModalProps> = ({
   isOpen,
   onClose,
   onAddSuccess,
   resourceType,
+  toolToEdit, 
+  vehicleToEdit, 
+  consumableToEdit,
 }) => {
 
   if (!isOpen) return null;
 
-  
-    const handleOverlayCLick = (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) {
-          onClose();
-      }
-    };
+  const handleOverlayCLick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+ 
 
   return (
     <div
@@ -40,9 +47,31 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({
           Add {resourceType}
         </h2>
 
-        {resourceType ===  "Tool" && <ToolsForm onClose={onClose} onAddSuccess={onAddSuccess} />}
-        {resourceType ===  "Consumable" && <ConsumableForm onClose={onClose} onAddSuccess={onAddSuccess} />}
-        {resourceType ===  "Vehicle" && <VehicleForm onClose={onClose} onAddSuccess={onAddSuccess} />}
+        {resourceType === "Tool" && (
+         <ToolsForm
+         onClose={onClose}
+         onAddSuccess={onAddSuccess}
+         toolToEdit={toolToEdit} 
+       />
+       
+        )}
+        {resourceType === "Consumable" && (
+          <ConsumableForm
+            onClose={onClose}
+            onAddSuccess={onAddSuccess}
+            addedBy=""
+            consumableToEdit={consumableToEdit} 
+         
+          />
+        )}
+        {resourceType === "Vehicle" && (
+          <VehicleForm
+            onClose={onClose}
+            onAddSuccess={onAddSuccess}
+            vehicleToEdit={vehicleToEdit} 
+          
+          />
+        )}
       </div>
     </div>
   );

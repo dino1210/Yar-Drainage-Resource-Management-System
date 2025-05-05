@@ -3,19 +3,7 @@ import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import PageMeta from "../components/common/PageMeta";
 import AddProjectModal from "./ProjectsComponent/AddProjectModal";
 import axios from "axios";
-import {
-  Eye,
-  Edit,
-  User,
-  MapPin,
-  CalendarDays,
-  CalendarCheck,
-  FileText,
-  Plus,
-  Wrench,
-  Droplet,
-  Truck,
-} from "lucide-react";
+import { Eye, Edit, User, MapPin, CalendarDays, CalendarCheck, FileText, Plus, Wrench, Droplet, Truck} from "lucide-react";
 
 type Project = {
   project_id: number;
@@ -53,6 +41,9 @@ export default function Projects() {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+
   const fetchProjects = async () => {
     try {
       const res = await axios.get(
@@ -81,11 +72,11 @@ export default function Projects() {
 
   const handleViewProject = (project: Project) => {
     setSelectedProject(project);
+    setIsViewModalOpen(true);
   };
 
-  const handleEditProject = (project: Project) => {
-    setSelectedProject(project);
-    setIsModalOpen(true); // Open the modal for editing
+  const handleEditProject = () => {
+    setIsModalOpen(true);
   };
 
   const getProjectStatus = (start: string, end: string): string => {
@@ -136,7 +127,6 @@ export default function Projects() {
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
             </select>
-            {/* Add Project Button */}
             <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-4 text-xs rounded-md bg-blue-600 dark:bg-blue-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
@@ -147,7 +137,6 @@ export default function Projects() {
           </div>
 
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            {/* Filters Section */}
             <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-4"></div>
           </div>
 
@@ -202,10 +191,7 @@ export default function Projects() {
                         day: "numeric",
                       })}
                     </p>
-
-                    {/* This wraps the badge and buttons in a flex container */}
                     <div className="mt-4 flex justify-between items-center">
-                      {/* Badge on the left */}
                       {(() => {
                         const status = getProjectStatus(
                           project.start_date,
@@ -228,23 +214,18 @@ export default function Projects() {
                           </span>
                         );
                       })()}
-
-                      {/* Buttons on the right */}
                       <div className="flex">
-                        {/* View Button */}
                         <button
                           onClick={() => handleViewProject(project)}
                           className="flex items-center text-green-500 hover:text-gray-400 px-2 py-0.5 transition"
                         >
-                          <Eye className="w-5" /> {/* Eye icon for View */}
+                          <Eye className="w-5" />
                         </button>
-
-                        {/* Edit Button */}
                         <button
-                          onClick={() => handleEditProject(project)}
+                          onClick={() => handleEditProject()}
                           className="flex items-center text-blue-500 hover:text-blue-400 px-2 py-0.5 transition"
                         >
-                          <Edit className="w-4" /> {/* Edit icon for Edit */}
+                          <Edit className="w-4" /> 
                         </button>
                       </div>
                     </div>

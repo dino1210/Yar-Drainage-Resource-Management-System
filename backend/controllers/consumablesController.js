@@ -33,9 +33,9 @@ const deleteConsumable = async (req, res) => {
 
 // Controller for UPDATE
 const updateConsumable = async (req, res) => {
-    const consumableId = req.params.id;
+    const consumableId = req.params.consumable_id;
     const consumableData = req.body;
-    consumableData.id = consumableId;
+    consumableData.consumable_id = consumableId;
 
     try {
         const result = await Consumable.updateConsumable(consumableData);
