@@ -17,6 +17,9 @@ import {
   Truck,
   X,
   UserPen,
+  CheckCircle,
+  XCircle,
+  RefreshCcw
 } from "lucide-react";
 
 type Project = {
@@ -56,8 +59,6 @@ export default function Projects() {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-
-
   const fetchProjects = async () => {
     try {
       const res = await axios.get(
@@ -88,8 +89,9 @@ export default function Projects() {
     setSelectedProject(project);
   };
 
-  const handleEditProject = () => {
+  const handleEditProject = (project: Project) => {
     setIsModalOpen(true);
+    console.log(project);
   };
 
   const getProjectStatus = (start: string, end: string): string => {
@@ -178,7 +180,7 @@ export default function Projects() {
                     key={project.project_id}
                     className={`cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-md transition hover:shadow-lg dark:border-gray-700 dark:bg-white/[0.05] ${
                       upcoming
-                        ? "border-b-4 border-green-500"
+                        ? "border-b-4 border-green-500 dark:border-green-500"
                         : "border-b-4 border-gray-200"
                     }`}
                   >
@@ -204,8 +206,9 @@ export default function Projects() {
                         day: "numeric",
                       })}
                     </p>
-                    <p className="mt-2 text-xs text-gray-400">Date Created:&nbsp; 
-                    {new Date(project.created_at).toLocaleDateString(
+                    <p className="mt-2 text-xs text-gray-400">
+                      Date Created:&nbsp;
+                      {new Date(project.created_at).toLocaleDateString(
                         "en-US",
                         {
                           year: "numeric",
@@ -214,8 +217,9 @@ export default function Projects() {
                         }
                       )}{" "}
                     </p>
-                    <p className="mt-1 text-xs text-gray-400">Created By:&nbsp; 
-                    {project.created_by}
+                    <p className="mt-1 text-xs text-gray-400">
+                      Created By:&nbsp;
+                      {project.created_by}
                     </p>
                     <div className="mt-4 flex justify-between items-center">
                       {(() => {
@@ -247,16 +251,21 @@ export default function Projects() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleViewProject(project)}
-                          className="flex items-center text-green-500 hover:text-gray-400  py-0.5 transition"
+                          className="flex items-center text-green-500 hover:text-gray-400 py-0.5 transition"
                         >
                           <Eye className="w-7" />
                         </button>
-                        <button
-                          onClick={() => handleEditProject()}
-                          className="flex items-center text-blue-500 hover:text-blue-400  py-0.5 transition"
-                        >
-                          <Edit className="w-4.5" />
-                        </button>
+                        {getProjectStatus(
+                          project.start_date,
+                          project.end_date
+                        ) === "Upcoming" && (
+                          <button
+                            onClick={() => handleEditProject(project)}
+                            className="flex items-center text-blue-500 hover:text-blue-400 py-0.5 transition"
+                          >
+                            <Edit className="w-4.5" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -285,7 +294,7 @@ export default function Projects() {
                   <X size={25} />
                 </button>
               </div>
-              <div className="overflow-y-auto max-h-[65vh] scrollbar-thin dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800 scrollbar-rounded">
+              <div className="overflow-y-auto max-h-[70vh] scrollbar-thin dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800 scrollbar-rounded">
                 <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 mr-5">
                   <div className="flex justify-between items-center w-full">
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
@@ -559,6 +568,36 @@ export default function Projects() {
                       </table>
                     </div>
                   </div>
+
+                  <div className="mt-5 flex justify-center w-full">
+  <div className="flex gap-3">
+    <button
+      onClick={() => console.log("Project Completed")}
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-white transition shadow-sm"
+    >
+      <CheckCircle className="w-4 h-4" />
+      Mark as Complete
+    </button>
+
+    <button
+      onClick={() => console.log("Project Terminated")}
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-white transition shadow-sm"
+    >
+      <XCircle className="w-4 h-4" />
+      Cancel Project
+    </button>
+
+    {/* Extend button */}
+    <button
+      onClick={() => console.log("Project Terminated")}
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 hover:bg-yellow-200 text-yellow-700 dark:bg-yellow-800 dark:hover:bg-yellow-700 dark:text-white transition shadow-sm"
+    >
+      <RefreshCcw className="w-4 h-4" />
+      Extend Project
+    </button>
+  </div>
+</div>
+
                 </div>
               </div>
             </div>
