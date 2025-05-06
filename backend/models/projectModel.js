@@ -3,21 +3,10 @@ const cron = require("node-cron");
 
 // CREATE PROJECT
 const createProject = async (projectData) => {
-  const currentDate = new Date();
-  const startDate = new Date(projectData.start_date);
-  const endDate = new Date(projectData.end_date);
-
-  // Determine project status
-  let projectStatus = 'Upcoming';  // Default status
-  if (currentDate >= startDate && currentDate <= endDate) {
-    projectStatus = 'On-going';
-  } else if (currentDate > endDate) {
-    projectStatus = 'Completed';
-  }
 
   const query = `
-    INSERT INTO projects (name, person_in_charge, location, description, start_date, end_date, project_status, created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO projects (name, person_in_charge, location, description, start_date, end_date, created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
   const values = [
     projectData.name,
@@ -26,7 +15,6 @@ const createProject = async (projectData) => {
     projectData.description,
     projectData.start_date,
     projectData.end_date,
-    projectStatus,  // Include projectStatus in the query
     projectData.created_by,
   ];
 
@@ -39,41 +27,31 @@ const createProject = async (projectData) => {
   }
 };
 
-// Function to update project status periodically (for ongoing projects)
-const updateProjectStatus = async (projectId, startDate, endDate) => {
-  const currentDate = new Date();
-  let projectStatus = 'Upcoming';  // Default status
-  if (currentDate >= new Date(startDate) && currentDate <= new Date(endDate)) {
-    projectStatus = 'Ongoing';
-  } else if (currentDate > new Date(endDate)) {
-    projectStatus = 'Completed';
+// Function to update resource status based on project status
+const updateResourceStatus = async (projectId, projectStatus) => {
+  let resourceStatus = '';
+
+  // Determine resource status based on project status
+  if (projectStatus === 'Upcoming') {
+    resourceStatus = 'Reserved';
+  } else if (projectStatus === 'On-going') {
+    resourceStatus = 'Issued-out';
+  } else if (projectStatus === 'Completed') {
+    resourceStatus = 'Available';
   }
 
-  const query = `UPDATE projects SET project_status = ? WHERE project_id = ?`;
-  const values = [projectStatus, projectId];
+  // Update tool status
+  const updateToolQuery = `UPDATE tools SET status = ? WHERE project_id = ?`;
+  const updateConsumableQuery = `UPDATE consumables SET status = ? WHERE project_id = ?`;
+  const updateVehicleQuery = `UPDATE vehicles SET status = ? WHERE project_id = ?`;
 
   try {
-    await db.query(query, values);
-    console.log(`Project ${projectId} status updated to ${projectStatus}`);
+    await db.query(updateToolQuery, [resourceStatus, projectId]);
+    await db.query(updateConsumableQuery, [resourceStatus, projectId]);
+    await db.query(updateVehicleQuery, [resourceStatus, projectId]);
+    console.log(`Resources for Project ${projectId} updated to ${resourceStatus}`);
   } catch (error) {
-    console.error("Error updating project status:", error.message);
-    throw error;
-  }
-};
-
-// Function to update tool status
-const updateToolStatus = async (toolId, projectStartDate) => {
-  const currentDate = new Date();
-  const status = currentDate < new Date(projectStartDate) ? "Reserved" : "Issued-out";
-
-  const query = `UPDATE tools SET status = ? WHERE tool_id = ?`;
-  const values = [status, toolId];
-
-  try {
-    await db.query(query, values);
-    console.log(`Tool ${toolId} status updated to ${status}`);
-  } catch (error) {
-    console.error("Error updating tool status:", error.message);
+    console.error("Error updating resource status:", error.message);
     throw error;
   }
 };
@@ -90,10 +68,6 @@ const linkToolsToProject = async (projectId, tools, projectStartDate) => {
 
   try {
     const [results] = await db.query(query, flatValues);
-
-    // Start cron job to periodically check and update statuses for tools
-    startStatusUpdater(tools, [], [], projectStartDate);
-
     return results;
   } catch (error) {
     console.error("Error linking tools:", error.message);
@@ -158,10 +132,6 @@ const linkVehiclesToProject = async (projectId, vehicles, projectStartDate) => {
 
   try {
     const [results] = await db.query(query, flatValues);
-
-    // Start cron job to periodically check and update statuses for vehicles
-    startStatusUpdater([], vehicles, [], projectStartDate);
-
     return results;
   } catch (error) {
     console.error("Error linking vehicles:", error.message);
@@ -169,48 +139,6 @@ const linkVehiclesToProject = async (projectId, vehicles, projectStartDate) => {
   }
 };
 
-// Cron job function to periodically update statuses
-const startStatusUpdater = (tools, vehicles, consumables, projectStartDate) => {
-  // Cron job to run every minute (adjust as necessary)
-  cron.schedule('* * * * *', async () => {
-    try {
-      // Update tool statuses
-      for (const toolId of tools) {
-        await updateToolStatus(toolId, projectStartDate);
-      }
-
-      // Update vehicle statuses
-      for (const vehicleId of vehicles) {
-        await updateVehicleStatus(vehicleId, projectStartDate);
-      }
-
-      // Update consumable statuses
-      for (const consumableId of consumables) {
-        await updateConsumableStatus(consumableId, projectStartDate);
-      }
-
-    } catch (error) {
-      console.error("Error during periodic status update:", error.message);
-    }
-  });
-};
-
-// Function to update consumable status
-const updateConsumableStatus = async (consumableId, projectStartDate) => {
-  const currentDate = new Date();
-  const status = currentDate < new Date(projectStartDate) ? "Reserved" : "Used";
-
-  const query = `UPDATE consumables SET status = ? WHERE consumable_id = ?`;
-  const values = [status, consumableId];
-
-  try {
-    await db.query(query, values);
-    console.log(`Consumable ${consumableId} status updated to ${status}`);
-  } catch (error) {
-    console.error("Error updating consumable status:", error.message);
-    throw error;
-  }
-};
 
 const getAllProjects = async () => {
   const query = `
@@ -245,24 +173,19 @@ const getAllProjects = async () => {
       v.remarks AS vehicle_remarks,
       v.plate_no AS vehicle_plate_no,
       v.assigned_driver AS vehicle_assigned_driver
-
-    FROM projects p
+    FROM project_status_view p
     LEFT JOIN project_tools pt ON pt.project_id = p.project_id
     LEFT JOIN tools t ON t.tool_id = pt.tool_id
-
     LEFT JOIN project_consumables pc ON pc.project_id = p.project_id
     LEFT JOIN consumables c ON c.consumable_id = pc.consumable_id
-
     LEFT JOIN project_vehicles pv ON pv.project_id = p.project_id
     LEFT JOIN vehicles v ON v.vehicle_id = pv.vehicle_id
   `;
 
   try {
     const [results] = await db.query(query);
-
     const projects = results.reduce((acc, row) => {
       let project = acc.find((p) => p.project_id === row.project_id);
-
       if (!project) {
         project = {
           project_id: row.project_id,
@@ -282,7 +205,6 @@ const getAllProjects = async () => {
         acc.push(project);
       }
 
-      // Add tool if exists and not already added
       if (row.tool_id && !project.tools.some((t) => t.id === row.tool_id)) {
         project.tools.push({
           id: row.tool_id,
@@ -292,11 +214,7 @@ const getAllProjects = async () => {
         });
       }
 
-      // Add consumable
-      if (
-        row.consumable_id &&
-        !project.consumables.some((c) => c.id === row.consumable_id)
-      ) {
+      if (row.consumable_id && !project.consumables.some((c) => c.id === row.consumable_id)) {
         project.consumables.push({
           id: row.consumable_id,
           name: row.consumable_name,
@@ -306,11 +224,7 @@ const getAllProjects = async () => {
         });
       }
 
-      // Add vehicle if exists and not already added
-      if (
-        row.vehicle_id &&
-        !project.vehicles.some((v) => v.id === row.vehicle_id)
-      ) {
+      if (row.vehicle_id && !project.vehicles.some((v) => v.id === row.vehicle_id)) {
         project.vehicles.push({
           id: row.vehicle_id,
           name: row.vehicle_name,
@@ -337,6 +251,29 @@ const getRecentProjects = async () => {
   return rows;
 };
 
+// GET SINGLE TOOL BY ID
+const getProjectById = async (projectId) => {
+  const query = `SELECT * FROM projects WHERE project_id = ?`;
+
+  try {
+    const [results] = await db.query(query, [projectId]);
+    return results[0]; // Return the first tool, or undefined if not found
+  } catch (err) {
+    throw new Error("Error fetching project by ID: " + err.message);
+  }
+};
+
+const updateProjectStatusInDB = async (project_id, newStatus) => {
+  const query = `UPDATE projects SET manual_status = ? WHERE project_id = ?`;
+  try {
+    await db.query(query, [newStatus, project_id]); // ✅ fixed: use project_id not projectId
+    console.log(`Project ${project_id} status updated to ${newStatus}`);
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 module.exports = {
   createProject,
   linkToolsToProject,
@@ -344,4 +281,6 @@ module.exports = {
   linkVehiclesToProject,
   getAllProjects,
   getRecentProjects,
+  updateProjectStatusInDB,
+  getProjectById,
 };

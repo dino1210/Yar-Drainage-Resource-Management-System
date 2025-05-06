@@ -251,7 +251,7 @@ const AddProjectModal: React.FC<Props> = ({ isOpen, onClose, project }) => {
             <div className="flex space-x-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Project Name
+                  Project Name / Company Name
                 </label>
                 <input
                   type="text"

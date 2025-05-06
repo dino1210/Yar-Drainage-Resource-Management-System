@@ -16,7 +16,7 @@ const createProject = async (req, res) => {
       vehicle_ids,
     } = req.body;
 
-    if (
+    if ( 
       !name ||
       !person_in_charge ||
       !description ||
@@ -98,6 +98,21 @@ const getAllProjects = async (req, res) => {
   }
 };
 
+// Get Tool by ID
+const getProjectById = async (req, res) => {
+  const projectId = req.params.id;
+  try {
+    const project = await Project.getProjectById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+    res.status(200).json(project);
+  } catch (err) {
+    console.error("Error fetching project:", err.message);
+    res.status(500).json({ message: "Error fetching project", error: err.message });
+  }
+};
+
 const getRecentProjects = async (req, res) => {
   try {
     const recentProjects = await Project.getRecentProjects();
@@ -107,8 +122,25 @@ const getRecentProjects = async (req, res) => {
   }
 };
 
+const updateProjectStatus = async (req, res) => {
+  const { project_id } = req.params;
+  const { manual_status } = req.body;
+
+  try {
+    await updateProjectStatus(project_id, manual_status); 
+    await updateResourceStatus(project_id, manual_status);
+
+    res.status(200).json({ message: `Project status updated to ${manual_status}` });
+  } catch (error) {
+    console.error("Error updating project status:", error.message);
+    res.status(500).json({ message: "Failed to update project status", error: error.message });
+  }
+};
+
 module.exports = {
   createProject,
   getAllProjects,
   getRecentProjects,
+  updateProjectStatus,
+  getProjectById
 };

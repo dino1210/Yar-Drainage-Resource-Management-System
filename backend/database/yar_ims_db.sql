@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2025 at 04:08 PM
+-- Generation Time: May 06, 2025 at 10:46 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -68,9 +68,9 @@ CREATE TABLE `consumables` (
 --
 
 INSERT INTO `consumables` (`consumable_id`, `picture`, `tag`, `name`, `quantity`, `minStock`, `unit`, `location`, `date`, `status`, `qr`, `category`) VALUES
-(1, '1745822603388-364008207.jpg', ' DISC-002', 'Cutting Disc 4\" 2.5mm', 99, 20, 'pcs', ' Rack 3-Drawer 11', '2025-04-28', 'In Stock', '', ' Cutting Disk'),
-(2, '1745822713321-485494957.jpg', ' DBIT-006', ' Drill Bit Steel 1/2', 100, 3, 'pcs', ' Rack 3-Drawer 17', '2025-04-28', 'In Stock', '', ' Drill Bit'),
-(3, '1745822960475-604811994.jpg', ' WROD-00', ' Welding Rod N-6011', 10, 25, 'kg', ' Rack 3-Drawer 15', '2025-04-28', 'In Stock', '', ' Welding Rod'),
+(1, '1745822603388-364008207.jpg', ' DISC-002', 'Cutting Disc 4\" 2.5mm', 98, 20, 'pcs', ' Rack 3-Drawer 11', '2025-04-28', 'In Stock', '', ' Cutting Disk'),
+(2, '1745822713321-485494957.jpg', ' DBIT-006', ' Drill Bit Steel 1/2', 98, 3, 'pcs', ' Rack 3-Drawer 17', '2025-04-28', 'In Stock', '', ' Drill Bit'),
+(3, '1745822960475-604811994.jpg', ' WROD-00', ' Welding Rod N-6011', 9, 25, 'kg', ' Rack 3-Drawer 15', '2025-04-28', 'In Stock', '', ' Welding Rod'),
 (4, '1745823073022-335597718.jpg', ' CLMP-006', ' Metal Clamp 2\" 2 Holes Fab', 100, 5, 'pcs', 'Rcabinet-Drawer 3', '2025-04-28', 'In Stock', '', ' Metal Clamp'),
 (5, '1745823211823-557831080.jpg', ' NAIL-009', ' Concrete Nail 1 1/2\"', 100, 5, 'kg', 'BCabinet-Drawer 8', '2025-04-28', 'In Stock', '', ' Nail');
 
@@ -116,18 +116,16 @@ CREATE TABLE `projects` (
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `created_by` varchar(255) NOT NULL
+  `created_by` varchar(255) NOT NULL,
+  `manual_status` enum('Cancelled','On-Going','Upcoming','Completed') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `projects`
 --
 
-INSERT INTO `projects` (`project_id`, `name`, `person_in_charge`, `location`, `description`, `start_date`, `end_date`, `created_at`, `created_by`) VALUES
-(79, 'TUP MANILA DRAINAGE FIX', 'Angelo Padilla', '123 Street Morayta Cubao Expo Diliman', 'The underground drainage system of tup needs to be renovated', '2025-05-21', '2025-05-26', '2025-05-05 13:20:18', ''),
-(80, 'Test Project', 'John Doe', 'Site A', 'Testing', '2025-05-01', '2025-05-31', '2025-05-05 13:26:08', ''),
-(81, 'h jn', 'bhjn', 'gbhn', 'gbh', '2025-05-04', '2025-05-05', '2025-05-05 13:59:07', 'Admin'),
-(82, 'CREATED BY', 'vkbhnkj', 'bkhnkj', 'bhnkj', '2025-05-04', '2025-05-05', '2025-05-05 14:00:11', 'Admin');
+INSERT INTO `projects` (`project_id`, `name`, `person_in_charge`, `location`, `description`, `start_date`, `end_date`, `created_at`, `created_by`, `manual_status`) VALUES
+(107, 'Delsan Corporate Center', 'Nolly Alvarado', 'Ayala Malls Circuit, Circuit Makati, Makati, 1207 Metro Manila', 'The underground drainage system of Delsan needs renovation.', '2025-05-09', '2025-05-29', '2025-05-06 07:27:56', 'Nolly Alvarado', NULL);
 
 -- --------------------------------------------------------
 
@@ -142,6 +140,33 @@ CREATE TABLE `project_consumables` (
   `allocated_quantity` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `project_consumables`
+--
+
+INSERT INTO `project_consumables` (`id`, `project_id`, `consumable_id`, `allocated_quantity`) VALUES
+(15, 107, 2, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `project_status_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `project_status_view` (
+`project_id` int(11)
+,`name` varchar(255)
+,`person_in_charge` varchar(255)
+,`location` varchar(255)
+,`description` text
+,`start_date` date
+,`end_date` date
+,`created_at` timestamp
+,`created_by` varchar(255)
+,`manual_status` enum('Cancelled','On-Going','Upcoming','Completed')
+,`project_status` varchar(9)
+);
+
 -- --------------------------------------------------------
 
 --
@@ -155,6 +180,14 @@ CREATE TABLE `project_tools` (
   `created_at` date NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `project_tools`
+--
+
+INSERT INTO `project_tools` (`id`, `project_id`, `tool_id`, `created_at`) VALUES
+(52, 107, 1, '2025-05-06'),
+(53, 107, 5, '2025-05-06');
+
 -- --------------------------------------------------------
 
 --
@@ -167,6 +200,13 @@ CREATE TABLE `project_vehicles` (
   `vehicle_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `project_vehicles`
+--
+
+INSERT INTO `project_vehicles` (`id`, `project_id`, `vehicle_id`, `created_at`) VALUES
+(26, 107, 1, '2025-05-06 07:27:56');
 
 -- --------------------------------------------------------
 
@@ -184,7 +224,7 @@ CREATE TABLE `tools` (
   `description` text DEFAULT NULL,
   `purchase_date` date DEFAULT NULL,
   `warranty` date DEFAULT NULL,
-  `status` varchar(100) DEFAULT 'Available',
+  `status` enum('Available','Reserved','Issued-out','Cancelled') DEFAULT 'Available',
   `remarks` text DEFAULT NULL,
   `qr` mediumtext DEFAULT NULL,
   `qr_code_id` varchar(255) NOT NULL
@@ -199,7 +239,8 @@ INSERT INTO `tools` (`tool_id`, `picture`, `name`, `brand`, `category`, `tag`, `
 (2, '1745821628548-538938628.jpg', 'Dartek Angle Grinder', 'Dartek', 'Angle Grinder', 'POWER-ANGLGRNDR_DARTEK-1', 'Rated Input Power, 760W. No-Load Speed, 11500r/min. Max Wheel Diameter, 100mm. Hole Diameter of Wheel, 16mm.', '2025-03-31', '2025-04-24', 'Available', 'Brand New', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c.png', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c'),
 (3, '1745821790372-377372672.jpg', 'Megaman Floodlight ', 'Megaman', 'Light', 'POWER-FLDLIGHT_MGMN-1', '0W 840 IP66 IK08. 711433 ; FL TITO 90W 840 IP66 IK08. 710825 ; FL TITO 120W 840 IP66 IK08.', '2025-04-01', '2049-04-13', 'Available', 'Brand New', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21.png', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21'),
 (4, '1745821991819-726796547.jpg', 'Makita Nail Gun', 'Makita', 'Nail Gun', 'POWER-NAILGUN_MKTA-1', 'Nail size capacity: 10-50mm (19/32\"-2\") Nail type: F15-F50 Gauge: 18 Operating pressure: 60-100psi', '2025-03-31', '2027-04-07', 'Available', 'Brand New', 'TOOL-344ede88-66df-4571-adca-79450032c487.png', 'TOOL-344ede88-66df-4571-adca-79450032c487'),
-(5, '1745822173903-752629888.jpg', 'Welding Mask', 'Generic', 'Welding Mask', 'OTHERS-WLDGMASK-1', 'equipped with #12 Dark Glass for safety', '2025-03-31', '2025-04-08', 'Available', 'Brand New', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760.png', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760');
+(5, '1745822173903-752629888.jpg', 'Welding Mask', 'Generic', 'Welding Mask', 'OTHERS-WLDGMASK-1', 'equipped with #12 Dark Glass for safety', '2025-03-31', '2025-04-08', 'Available', 'Brand New', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760.png', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760'),
+(18, '1746499438447-971438946.png', 'TEST STATUS', 'bjgjhn', 'hjbkn', 'hbnjm', 'hbnj', '2025-05-05', '2025-05-06', 'Available', 'gbhknj', 'TOOL-281e3da5-6beb-4ea0-93cf-1854288cdcfb.png', 'TOOL-281e3da5-6beb-4ea0-93cf-1854288cdcfb');
 
 -- --------------------------------------------------------
 
@@ -252,7 +293,8 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `profile`, `stat
 (11, 'Test', 'test@gmail.com', '$2b$10$U8UmDZHrqrWMBbTva8QXj.CerWjePGPWXS/KiikC5KeIOkbL.sbBS', 'Admin', '', 'Active', '2025-04-30'),
 (12, 'ronald', 'ronald', '$2b$10$mYEEsT85MOWVcKEG4ZaFR.BJNp3flF0RL49o1vqlshlPJEWx7mI8O', 'Admin', '', 'Active', '2025-04-30'),
 (13, 'RonaldGwapo', 'ronaldjr', '$2b$10$WSB4f1pu0sWFJYKpI16eYOTgsMlvVwQ3KwGvjfW9n6xoU4qPiHKSi', 'Admin', '', 'Active', '2025-05-01'),
-(14, 'Itchoy', 'itchoy', '$2b$10$UWTOXYc1x4I09I.rmJyBF.niDYq9tniQHtgo.9W7t0tGquS/AIcT.', 'Admin', '', 'Active', '2025-05-01');
+(14, 'Itchoy', 'itchoy', '$2b$10$UWTOXYc1x4I09I.rmJyBF.niDYq9tniQHtgo.9W7t0tGquS/AIcT.', 'Admin', '', 'Active', '2025-05-01'),
+(15, 'Nolly Alvarado', 'nolly', '$2b$10$0Goa0nFhCO3cxMKw7hXZOe0HFlx.BGfCaJWWvbC26RfvRa1JLE.cO', 'Admin', '', 'Active', '2025-05-06');
 
 -- --------------------------------------------------------
 
@@ -270,7 +312,7 @@ CREATE TABLE `vehicles` (
   `fuel_type` varchar(50) DEFAULT NULL,
   `location` varchar(100) DEFAULT NULL,
   `acquisition_date` date DEFAULT NULL,
-  `status` varchar(50) DEFAULT NULL,
+  `status` enum('Available','Reserved','Issued-out','Cancelled') DEFAULT 'Available',
   `remarks` varchar(255) DEFAULT NULL,
   `maintenance_due` date DEFAULT NULL,
   `assigned_driver` varchar(100) DEFAULT NULL,
@@ -314,6 +356,15 @@ INSERT INTO `vehicles_logs` (`id`, `vehicle_name`, `performed_by`, `issued_date`
 (42, 'Hino Dump Truck', 'hello', '2025-05-02 00:26:35', 'Issued Out'),
 (43, 'Hino Dump Truck', 'hello', '2025-05-02 00:26:42', 'Returned'),
 (44, 'Hino Dump Truck', 'sample', '2025-05-02 00:32:08', 'Issued Out');
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `project_status_view`
+--
+DROP TABLE IF EXISTS `project_status_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `project_status_view`  AS SELECT `p`.`project_id` AS `project_id`, `p`.`name` AS `name`, `p`.`person_in_charge` AS `person_in_charge`, `p`.`location` AS `location`, `p`.`description` AS `description`, `p`.`start_date` AS `start_date`, `p`.`end_date` AS `end_date`, `p`.`created_at` AS `created_at`, `p`.`created_by` AS `created_by`, `p`.`manual_status` AS `manual_status`, CASE WHEN `p`.`manual_status` = 'Cancelled' THEN 'Cancelled' WHEN `p`.`manual_status` = 'Completed' THEN 'Completed' WHEN `p`.`manual_status` = 'Extended' THEN 'Extended' WHEN `p`.`end_date` < curdate() AND `p`.`manual_status` is null THEN 'Overtime' WHEN `p`.`start_date` > curdate() THEN 'Upcoming' WHEN `p`.`start_date` <= curdate() AND `p`.`end_date` >= curdate() THEN 'On-Going' ELSE 'Unknown' END AS `project_status` FROM `projects` AS `p` ;
 
 --
 -- Indexes for dumped tables
@@ -424,31 +475,31 @@ ALTER TABLE `consumables_logs`
 -- AUTO_INCREMENT for table `projects`
 --
 ALTER TABLE `projects`
-  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
 
 --
 -- AUTO_INCREMENT for table `project_consumables`
 --
 ALTER TABLE `project_consumables`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `project_tools`
 --
 ALTER TABLE `project_tools`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- AUTO_INCREMENT for table `project_vehicles`
 --
 ALTER TABLE `project_vehicles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `tools`
 --
 ALTER TABLE `tools`
-  MODIFY `tool_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `tool_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `tools_log`
@@ -460,7 +511,7 @@ ALTER TABLE `tools_log`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `vehicles`

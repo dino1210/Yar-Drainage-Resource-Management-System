@@ -19,7 +19,8 @@ import {
   UserPen,
   CheckCircle,
   XCircle,
-  RefreshCcw
+  RefreshCcw,
+  Trash2,
 } from "lucide-react";
 
 type Project = {
@@ -32,7 +33,7 @@ type Project = {
   end_date: string;
   created_at: string;
   created_by: string;
-  status?: "Upcoming" | "On-Going" | "Completed" | "Cancelled";
+  project_status: string;
   tools: Array<{ id: number; name: string; category: string; tag: string }>;
   consumables: Array<{
     id: number;
@@ -79,13 +80,11 @@ export default function Projects() {
     fetchProjects();
   };
 
-  const isUpcoming = (startDate: string) => {
-    const today = new Date();
-    const projectStartDate = new Date(startDate);
-    return projectStartDate > today;
+  const handleViewProject = (project: Project) => {
+    setSelectedProject(project);
   };
 
-  const handleViewProject = (project: Project) => {
+  const handleDeleteProject = (project: Project) => {
     setSelectedProject(project);
   };
 
@@ -94,16 +93,29 @@ export default function Projects() {
     console.log(project);
   };
 
-  const getProjectStatus = (start: string, end: string): string => {
-    const now = new Date();
-    const startDate = new Date(start);
-    const endDate = new Date(end);
+  const handleStatusChange = async (newStatus: string) => {
+    if (selectedProject) {
+      try {
 
-    if (endDate < now) return "Completed";
-    if (startDate > now) return "Upcoming";
-    if (startDate <= now && endDate >= now) return "On-Going";
-    return "Cancelled";
+        await axios.put(
+          `${import.meta.env.VITE_API_BASE_URL}/api/projects/update-status/${selectedProject.project_id}`,
+          { manual_status: newStatus }
+        );
+  
+        // Update local state to reflect the new status
+        setSelectedProject({
+          ...selectedProject,
+          project_status: newStatus,
+        });
+  
+        // Optionally, re-fetch all projects if needed
+        fetchProjects();
+      } catch (error) {
+        console.error(`Error updating project status to ${newStatus}`, error);
+      }
+    }
   };
+  
 
   return (
     <div>
@@ -159,11 +171,7 @@ export default function Projects() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {projects
               .filter((project) => {
-                const status = getProjectStatus(
-                  project.start_date,
-                  project.end_date
-                );
-
+                const status = project.project_status; // Directly using project_status from backend
                 const statusMatch =
                   statusFilter === "All" || status === statusFilter;
                 return statusMatch;
@@ -174,14 +182,23 @@ export default function Projects() {
                 return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
               })
               .map((project) => {
-                const upcoming = isUpcoming(project.start_date);
                 return (
                   <div
                     key={project.project_id}
                     className={`cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-md transition hover:shadow-lg dark:border-gray-700 dark:bg-white/[0.05] ${
-                      upcoming
-                        ? "border-b-4 border-green-500 dark:border-green-500"
-                        : "border-b-4 border-gray-200"
+                      project.project_status === "Upcoming"
+                        ? "border-b-4 border-green-600 dark:border-green-400"
+                        : project.project_status === "On-Going"
+                        ? "border-b-4 border-yellow-600 dark:border-yellow-400"
+                        : project.project_status === "Completed"
+                        ? "border-b-4 border-blue-600 dark:border-blue-400"
+                        : project.project_status === "Cancelled"
+                        ? "border-b-4 border-red-600 dark:border-red-400"
+                        : project.project_status === "Extended"
+                        ? "border-b-4 border-purple-600 dark:border-purple-400"
+                        : project.project_status === "Overtime"
+                        ? "border-b-4 border-orange-600 dark:border-orange-400"
+                        : "border-b-4 border-gray-300"
                     }`}
                   >
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
@@ -222,32 +239,26 @@ export default function Projects() {
                       {project.created_by}
                     </p>
                     <div className="mt-4 flex justify-between items-center">
-                      {(() => {
-                        const status = getProjectStatus(
-                          project.start_date,
-                          project.end_date
-                        );
-                        const badgeStyles: Record<string, string> = {
-                          Upcoming:
-                            "bg-green-500/10 text-green-600 dark:bg-green-400/10 dark:text-green-400",
-                          "On-Going":
-                            "bg-yellow-400/10 text-yellow-700 dark:bg-yellow-300/10 dark:text-yellow-300",
-                          Completed:
-                            "bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400",
-                          Cancelled:
-                            "bg-red-500/10 text-red-600 dark:bg-red-400/10 dark:text-red-400",
-                        };
-
-                        return (
-                          <span
-                            className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                              badgeStyles[status] || "bg-gray-200 text-gray-800"
-                            }`}
-                          >
-                            {status}
-                          </span>
-                        );
-                      })()}
+                      {/* Displaying Project Status */}
+                      <span
+                        className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                          project.project_status === "Upcoming"
+                            ? "bg-green-500/10 text-green-600 dark:bg-green-400/10 dark:text-green-400"
+                            : project.project_status === "On-Going"
+                            ? "bg-yellow-400/10 text-yellow-700 dark:bg-yellow-300/10 dark:text-yellow-300"
+                            : project.project_status === "Completed"
+                            ? "bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400"
+                            : project.project_status === "Cancelled"
+                            ? "bg-red-500/10 text-red-600 dark:bg-red-400/10 dark:text-red-400"
+                            : project.project_status === "Extended"
+                            ? "bg-purple-500/10 text-purple-600 dark:bg-purple-400/10 dark:text-purple-400"
+                            : project.project_status === "Overtime"
+                            ? "bg-orange-500/10 text-orange-600 dark:bg-orange-400/10 dark:text-orange-400"
+                            : "bg-gray-200 text-gray-800"
+                        }`}
+                      >
+                        {project.project_status}
+                      </span>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleViewProject(project)}
@@ -255,15 +266,23 @@ export default function Projects() {
                         >
                           <Eye className="w-7" />
                         </button>
-                        {getProjectStatus(
-                          project.start_date,
-                          project.end_date
-                        ) === "Upcoming" && (
+
+                        {(project.project_status === "Upcoming" ||
+                          project.project_status === "On-Going") && (
                           <button
                             onClick={() => handleEditProject(project)}
                             className="flex items-center text-blue-500 hover:text-blue-400 py-0.5 transition"
                           >
                             <Edit className="w-4.5" />
+                          </button>
+                        )}
+
+                        {project.project_status === "Cancelled" && (
+                          <button
+                            onClick={() => handleDeleteProject(project)}
+                            className="flex items-center text-red-500 hover:text-red-400 py-0.5 transition"
+                          >
+                            <Trash2 className="w-4.5" />
                           </button>
                         )}
                       </div>
@@ -289,9 +308,9 @@ export default function Projects() {
               <div className="absolute top-2 right-3">
                 <button
                   onClick={() => setSelectedProject(null)}
-                  className=" text-gray-300 hover:bg-gray-300"
+                  className=" text-gray-300 bg-white dark:bg-gray-900"
                 >
-                  <X size={25} />
+                  <X size={25} className="hover:text-red-600" />
                 </button>
               </div>
               <div className="overflow-y-auto max-h-[70vh] scrollbar-thin dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800 scrollbar-rounded">
@@ -569,35 +588,43 @@ export default function Projects() {
                     </div>
                   </div>
 
-                  <div className="mt-5 flex justify-center w-full">
-  <div className="flex gap-3">
-    <button
-      onClick={() => console.log("Project Completed")}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-white transition shadow-sm"
-    >
-      <CheckCircle className="w-4 h-4" />
-      Mark as Complete
-    </button>
+                  {selectedProject.project_status !== "Cancelled" &&
+                    selectedProject.project_status !== "Completed" && (
+                      <div className="mt-5 flex justify-center w-full">
+                        <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-gray-900 sm:px-6 mr-5">
+                          <div className="flex gap-3">
+                            {/* Mark as Complete */}
+                            <button
+                               onClick={() => handleStatusChange("Completed")}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-white transition shadow-sm"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                              Mark as Complete
+                            </button>
 
-    <button
-      onClick={() => console.log("Project Terminated")}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-white transition shadow-sm"
-    >
-      <XCircle className="w-4 h-4" />
-      Cancel Project
-    </button>
+                            {/* Extend Project */}
+                            <button
+                              onClick={() => handleStatusChange("Extended")}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 hover:bg-yellow-200 text-yellow-700 dark:bg-yellow-800 dark:hover:bg-yellow-700 dark:text-white transition shadow-sm"
+                            >
+                              <RefreshCcw className="w-4 h-4" />
+                              Extend Project
+                            </button>
 
-    {/* Extend button */}
-    <button
-      onClick={() => console.log("Project Terminated")}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 hover:bg-yellow-200 text-yellow-700 dark:bg-yellow-800 dark:hover:bg-yellow-700 dark:text-white transition shadow-sm"
-    >
-      <RefreshCcw className="w-4 h-4" />
-      Extend Project
-    </button>
-  </div>
-</div>
-
+                            {/* Cancel Project - only show if status is Upcoming */}
+                            {selectedProject.project_status === "Upcoming" && (
+                              <button
+                              onClick={() => handleStatusChange("Cancelled")}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-white transition shadow-sm"
+                              >
+                                <XCircle className="w-4 h-4" />
+                                Cancel Project
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
