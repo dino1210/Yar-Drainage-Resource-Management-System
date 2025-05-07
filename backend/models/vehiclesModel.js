@@ -20,6 +20,7 @@ const addVehicle = async (vehicleData) => {
     warranty,
     maintenance_due,
     assigned_driver,
+    created_by,
   } = vehicleData;
 
   // Generate unique QR code ID
@@ -36,7 +37,7 @@ const addVehicle = async (vehicleData) => {
     fs.mkdirSync(qrFolderPath, { recursive: true });
   }
 
-  const insertQuery = `INSERT INTO vehicles (picture, name, brand, plate_no, category, fuel_type, location, acquisition_date, status, remarks, maintenance_due, warranty, assigned_driver, qr_code_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const insertQuery = `INSERT INTO vehicles (picture, name, brand, plate_no, category, fuel_type, location, acquisition_date, status, remarks, maintenance_due, warranty, assigned_driver,  created_by, qr_code_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   try {
     const [result] = await db.query(insertQuery, [
@@ -53,6 +54,7 @@ const addVehicle = async (vehicleData) => {
       maintenance_due,
       warranty,
       assigned_driver,
+      created_by,
       qrCodeId,
     ]);
 
@@ -91,7 +93,7 @@ const updateVehicle = async (vehicleData) => {
     maintenance_due,
     assigned_driver,
     qr,
-    qr_code_id, // Make sure this is included in the data
+    qr_code_id, 
   } = vehicleData;
 
   const query = `

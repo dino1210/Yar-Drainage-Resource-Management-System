@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import PageMeta from "../components/common/PageMeta";
 import AddProjectModal from "./ProjectsComponent/AddProjectModal";
+import DeleteModal from "../components/ui/modal/DeleteModal";
+import { toast } from "react-toastify";
 import axios from "axios";
 import {
   Eye,
@@ -60,6 +62,9 @@ export default function Projects() {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+
   const fetchProjects = async () => {
     try {
       const res = await axios.get(
@@ -85,7 +90,36 @@ export default function Projects() {
   };
 
   const handleDeleteProject = (project: Project) => {
-    setSelectedProject(project);
+    setProjectToDelete(project);
+    setIsDeleteModalOpen(true); 
+  };
+
+  const handleConfirmDelete = async () => {
+    if (projectToDelete) {
+      try {
+        await axios.delete(
+          `${import.meta.env.VITE_API_BASE_URL}/api/projects/delete/${
+            projectToDelete.project_id
+          }`
+        );
+
+        setProjects(
+          projects.filter((p) => p.project_id !== projectToDelete.project_id)
+        );
+
+        toast.success("Project deleted successfully.");
+      } catch (error) {
+        console.error("Error deleting project:", error);
+        alert("There was an error deleting the project.");
+      }
+
+      setIsDeleteModalOpen(false); 
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsModalOpen(false); 
+    setProjectToDelete(null); 
   };
 
   const handleEditProject = (project: Project) => {
@@ -96,26 +130,27 @@ export default function Projects() {
   const handleStatusChange = async (newStatus: string) => {
     if (selectedProject) {
       try {
-
         await axios.put(
-          `${import.meta.env.VITE_API_BASE_URL}/api/projects/update-status/${selectedProject.project_id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/api/projects/update-status/${
+            selectedProject.project_id
+          }`,
           { manual_status: newStatus }
         );
-  
-        // Update local state to reflect the new status
+
         setSelectedProject({
           ...selectedProject,
           project_status: newStatus,
         });
-  
-        // Optionally, re-fetch all projects if needed
+
+        setSelectedProject(null);
+        toast.success(`Project has been successfully ${newStatus}`)
         fetchProjects();
-      } catch (error) {
-        console.error(`Error updating project status to ${newStatus}`, error);
+      } catch {
+        toast.error(`Error updating project status to ${newStatus}`);
       }
+      setIsModalOpen(false)
     }
   };
-  
 
   return (
     <div>
@@ -139,7 +174,7 @@ export default function Projects() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="border p-2 text-xs rounded-md w-full sm:w-1/4 bg-white dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
             >
-              <option value="All">All</option>
+              <option value="All">Sort by Status</option>
               <option value="Upcoming">Upcoming</option>
               <option value="On-Going">On-Going</option>
               <option value="Completed">Completed</option>
@@ -151,6 +186,7 @@ export default function Projects() {
               onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
               className="border p-2 text-xs rounded-md w-full sm:w-1/4 bg-white dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
             >
+              <option>Sort by Date of Creation</option>
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
             </select>
@@ -162,6 +198,7 @@ export default function Projects() {
               <Plus className="w-4 h-4" />
             </button>
           </div>
+          <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
 
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-4"></div>
@@ -177,28 +214,28 @@ export default function Projects() {
                 return statusMatch;
               })
               .sort((a, b) => {
-                const dateA = new Date(a.start_date).getTime();
-                const dateB = new Date(b.start_date).getTime();
+                const dateA = new Date(a.created_at).getTime();
+                const dateB = new Date(b.created_at).getTime();
                 return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
               })
               .map((project) => {
                 return (
                   <div
                     key={project.project_id}
-                    className={`cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-md transition hover:shadow-lg dark:border-gray-700 dark:bg-white/[0.05] ${
+                    className={`cursor-pointer rounded-xl border border-gray-200 border-b-4 bg-white p-5 shadow-md transition hover:shadow-lg dark:border-gray-700 dark:border-b-4 dark:bg-white/[0.05] ${
                       project.project_status === "Upcoming"
-                        ? "border-b-4 border-green-600 dark:border-green-400"
+                        ? "border-b-green-600 dark:border-b-green-400"
                         : project.project_status === "On-Going"
-                        ? "border-b-4 border-yellow-600 dark:border-yellow-400"
+                        ? "border-b-yellow-600 dark:border-b-yellow-400"
                         : project.project_status === "Completed"
-                        ? "border-b-4 border-blue-600 dark:border-blue-400"
+                        ? "border-b-blue-600 dark:border-b-blue-400"
                         : project.project_status === "Cancelled"
-                        ? "border-b-4 border-red-600 dark:border-red-400"
+                        ? "border-b-red-600 dark:border-b-red-400"
                         : project.project_status === "Extended"
-                        ? "border-b-4 border-purple-600 dark:border-purple-400"
+                        ? "border-b-purple-600 dark:border-b-purple-400"
                         : project.project_status === "Overtime"
-                        ? "border-b-4 border-orange-600 dark:border-orange-400"
-                        : "border-b-4 border-gray-300"
+                        ? "border-b-orange-600 dark:border-b-orange-400"
+                        : "border-b-gray-300"
                     }`}
                   >
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
@@ -227,11 +264,7 @@ export default function Projects() {
                       Date Created:&nbsp;
                       {new Date(project.created_at).toLocaleDateString(
                         "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
+                        { year: "numeric", month: "long", day: "numeric" }
                       )}{" "}
                     </p>
                     <p className="mt-1 text-xs text-gray-400">
@@ -239,7 +272,6 @@ export default function Projects() {
                       {project.created_by}
                     </p>
                     <div className="mt-4 flex justify-between items-center">
-                      {/* Displaying Project Status */}
                       <span
                         className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
                           project.project_status === "Upcoming"
@@ -278,30 +310,34 @@ export default function Projects() {
                         )}
 
                         {project.project_status === "Cancelled" && (
-                          <button
-                            onClick={() => handleDeleteProject(project)}
-                            className="flex items-center text-red-500 hover:text-red-400 py-0.5 transition"
-                          >
-                            <Trash2 className="w-4.5" />
-                          </button>
+                          <div key={project.project_id}>
+                            <button
+                              onClick={() => handleDeleteProject(project)}
+                              className="flex items-center text-red-500 hover:text-red-400 py-0.5 transition"
+                            >
+                              <Trash2 className="w-4.5" />
+                            </button>
+                          </div>
                         )}
+                        <DeleteModal
+                          isOpen={isDeleteModalOpen}
+                          onClose={handleCloseDeleteModal}
+                          onConfirm={handleConfirmDelete}
+                          itemName={projectToDelete?.name}
+                        />
                       </div>
                     </div>
                   </div>
                 );
               })}
           </div>
-
-          {/* No Projects */}
           {projects.length === 0 && (
             <div className="mt-10 text-center text-gray-500 dark:text-gray-400">
               No projects found.
             </div>
           )}
         </div>
-
         <AddProjectModal isOpen={isModalOpen} onClose={handleCloseModal} />
-
         {selectedProject && (
           <div className="fixed inset-0 z-99999 flex items-center justify-center bg-black/50">
             <div className="relative z-10 w-full max-w-[45vw] overflow-y-auto rounded-xl bg-white px-5 py-4 shadow-lg dark:bg-gray-900">
@@ -589,42 +625,42 @@ export default function Projects() {
                   </div>
 
                   {selectedProject.project_status !== "Cancelled" &&
-                    selectedProject.project_status !== "Completed" && (
-                      <div className="mt-5 flex justify-center w-full">
-                        <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-gray-900 sm:px-6 mr-5">
-                          <div className="flex gap-3">
-                            {/* Mark as Complete */}
-                            <button
-                               onClick={() => handleStatusChange("Completed")}
-                              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-white transition shadow-sm"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                              Mark as Complete
-                            </button>
+ selectedProject.project_status !== "Completed" && (
+  <div className="mt-5 flex justify-center w-full">
+    <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-gray-900 sm:px-6 mr-5">
+      <div className="flex gap-3">
+        {selectedProject.project_status === "Upcoming" ? (
+          <button
+            onClick={() => handleStatusChange("Cancelled")}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-white transition shadow-sm"
+          >
+            <XCircle className="w-4 h-4" />
+            Cancel Project
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={() => handleStatusChange("Completed")}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-white transition shadow-sm"
+            >
+              <CheckCircle className="w-4 h-4" />
+              Mark as Complete
+            </button>
 
-                            {/* Extend Project */}
-                            <button
-                              onClick={() => handleStatusChange("Extended")}
-                              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 hover:bg-yellow-200 text-yellow-700 dark:bg-yellow-800 dark:hover:bg-yellow-700 dark:text-white transition shadow-sm"
-                            >
-                              <RefreshCcw className="w-4 h-4" />
-                              Extend Project
-                            </button>
+            <button
+              onClick={() => handleStatusChange("Extended")}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 hover:bg-yellow-200 text-yellow-700 dark:bg-yellow-800 dark:hover:bg-yellow-700 dark:text-white transition shadow-sm"
+            >
+              <RefreshCcw className="w-4 h-4" />
+              Extend Project
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
-                            {/* Cancel Project - only show if status is Upcoming */}
-                            {selectedProject.project_status === "Upcoming" && (
-                              <button
-                              onClick={() => handleStatusChange("Cancelled")}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-white transition shadow-sm"
-                              >
-                                <XCircle className="w-4 h-4" />
-                                Cancel Project
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
                 </div>
               </div>
             </div>

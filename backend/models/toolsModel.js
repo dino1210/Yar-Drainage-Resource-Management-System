@@ -17,6 +17,7 @@ const addTool = async (toolData) => {
     warranty,
     status = "Available",
     remarks,
+    created_by,
   } = toolData;
 
   // Generate unique QR code ID
@@ -45,8 +46,9 @@ const addTool = async (toolData) => {
       warranty,
       status,
       remarks,
+      created_by,
       qr_code_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   try {
@@ -61,6 +63,7 @@ const addTool = async (toolData) => {
       warranty,
       status,
       remarks,
+      created_by,
       qrCodeId,
     ]);
 

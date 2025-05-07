@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router";
 
 import { ChevronDownIcon, DocsIcon, GridIcon, HorizontaLDots } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { Boxes, CalendarCog, Package2, User, FileClock } from "lucide-react";
+import {  CalendarCog, Package2, User, FileClock } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 type NavItem = {
@@ -39,11 +39,11 @@ const navItems: NavItem[] = [
       { name: "Vehicles Logs", path: "/vehicles-logs", pro: false },
     ],
   },
-  {
-    icon: <Boxes />,
-    name: "Categories",
-    path: "/categories",
-  },
+  // {
+  //   icon: <Boxes />,
+  //   name: "Categories",
+  //   path: "/categories",
+  // },
   {
     icon: <DocsIcon />,
     name: "Reports",

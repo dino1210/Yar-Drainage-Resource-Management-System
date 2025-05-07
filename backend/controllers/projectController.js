@@ -122,18 +122,41 @@ const getRecentProjects = async (req, res) => {
   }
 };
 
+// UPDATE STATUS
 const updateProjectStatus = async (req, res) => {
-  const { project_id } = req.params;
+  const projectId = req.params.project_id;
   const { manual_status } = req.body;
 
   try {
-    await updateProjectStatus(project_id, manual_status); 
-    await updateResourceStatus(project_id, manual_status);
+    const result = await Project.updateProjectStatus(projectId, manual_status);
 
-    res.status(200).json({ message: `Project status updated to ${manual_status}` });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    res.status(200).json({ message: 'Project status updated successfully' });
   } catch (error) {
-    console.error("Error updating project status:", error.message);
-    res.status(500).json({ message: "Failed to update project status", error: error.message });
+    console.error('Error updating project status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+// DELETE PROJECT
+const deleteProject = async (req, res) => {
+  const projectId = req.params.project_id;
+
+  try {
+    const result = await Project.deleteProject(projectId);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Project not found or already deleted' });
+    }
+
+    res.status(200).json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting project:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -142,5 +165,6 @@ module.exports = {
   getAllProjects,
   getRecentProjects,
   updateProjectStatus,
-  getProjectById
+  getProjectById,
+  deleteProject,
 };

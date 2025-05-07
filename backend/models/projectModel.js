@@ -243,13 +243,34 @@ const getAllProjects = async () => {
   }
 };
 
-// GET RECENTLY CREATED PROJECTS
+// GET RECENTLY CREATED PROJECTS (with project_status from view)
 const getRecentProjects = async () => {
-  const [rows] = await db.query(
-    `SELECT * FROM projects ORDER BY created_at DESC LIMIT 5`
-  );
-  return rows;
+  const query = `
+    SELECT 
+      project_id,
+      name,
+      person_in_charge,
+      location,
+      description,
+      start_date,
+      end_date,
+      created_at,
+      created_by,
+      project_status
+    FROM project_status_view
+    ORDER BY created_at DESC
+    LIMIT 5
+  `;
+
+  try {
+    const [rows] = await db.query(query);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching recent projects:", error.message);
+    throw error;
+  }
 };
+
 
 // GET SINGLE TOOL BY ID
 const getProjectById = async (projectId) => {
@@ -263,11 +284,25 @@ const getProjectById = async (projectId) => {
   }
 };
 
-const updateProjectStatusInDB = async (project_id, newStatus) => {
+// UPDATE STATUS
+const updateProjectStatus = async (project_id, newStatus) => {
   const query = `UPDATE projects SET manual_status = ? WHERE project_id = ?`;
+
   try {
-    await db.query(query, [newStatus, project_id]); // ✅ fixed: use project_id not projectId
-    console.log(`Project ${project_id} status updated to ${newStatus}`);
+    const [result] = await db.query(query, [newStatus, project_id]); // MySQL2 returns [rows, fields]
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//DELETE PROJECT
+const deleteProject = async (project_id) => {
+  const query = `DELETE FROM projects WHERE project_id = ?`;
+
+  try {
+    const [result] = await db.query(query, [project_id]);
+    return result;
   } catch (error) {
     throw error;
   }
@@ -281,6 +316,7 @@ module.exports = {
   linkVehiclesToProject,
   getAllProjects,
   getRecentProjects,
-  updateProjectStatusInDB,
+  updateProjectStatus,
   getProjectById,
+  deleteProject,
 };

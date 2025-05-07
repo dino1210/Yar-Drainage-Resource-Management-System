@@ -68,14 +68,14 @@ const searchConsumables = async (query) => {
       `
       SELECT consumable_id, name, tag, quantity, unit 
       FROM consumables 
-      WHERE status = 'In Stock'
+      WHERE status IN ('In Stock', 'Low Stock')
         AND (
           LOWER(name) LIKE LOWER(?) OR 
           LOWER(tag) LIKE LOWER(?) OR 
           LOWER(quantity) LIKE LOWER(?) OR 
           LOWER(unit) LIKE LOWER(?)
         )
-      LIMIT 3
+      LIMIT 2
       `,
       Array(4).fill(`%${query}%`)
     );

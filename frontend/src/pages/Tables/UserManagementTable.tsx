@@ -43,7 +43,7 @@ export default function UserManagementTable() {
 
   const fetchUsers = () => {
     axios
-      .get("http://localhost:5000/api/users")
+      .get(`${import.meta.env.VITE_API_BASE_URL}/api/users`)
       .then((res) => setUsers(res.data))
       .catch((err) => console.error(" Failed to fetch users:", err));
   };
@@ -51,7 +51,7 @@ export default function UserManagementTable() {
   const handleDelete = (userId: number) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     axios
-      .delete(`http://localhost:5000/api/users/${userId}`)
+      .delete(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`)
       .then(() => fetchUsers())
       .catch((err) => console.error(" Failed to delete user:", err));
   };
@@ -61,7 +61,10 @@ export default function UserManagementTable() {
       return alert("Please fill in all fields.");
     }
     try {
-      const res = await axios.post("http://localhost:5000/api/users", form);
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/users`,
+        form
+      );
       if (res.status === 201 || res.status === 200) {
         setShowModal(false);
         fetchUsers();
@@ -100,7 +103,7 @@ export default function UserManagementTable() {
       return alert("Please fill in all fields.");
     }
     axios
-      .put(`http://localhost:5000/api/users/${editId}`, form)
+      .put(`${import.meta.env.VITE_API_BASE_URL}/api/users/${editId}`, form)
       .then(() => {
         setShowEditModal(false);
         fetchUsers();
@@ -179,13 +182,13 @@ export default function UserManagementTable() {
 
         <Table>
           <TableHeader className="border-b text-sm border-gray-100 dark:border-gray-700">
-            <TableRow>
+            <TableRow className="hover:bg-gray-50 dark:hover:bg-gray-800 transition">
               {["Name", "Email", "Role", "Status", "Actions"].map(
                 (header, index) => (
                   <TableCell
                     key={index}
                     isHeader
-                    className="px-5 py-3 font-semibold text-theme-xs text-gray-500 dark:text-gray-400 text-start"
+                    className="px-6 py-4 text-center text-sm font-medium text-gray-500 tracking-wider dark:text-white"
                   >
                     {header}
                   </TableCell>
@@ -198,21 +201,21 @@ export default function UserManagementTable() {
             {currentUsers.length > 0 ? (
               currentUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="px-5 py-4 text-start text-xs font-medium text-gray-800 dark:text-white">
+                  <TableCell className="px-6 py-4 text-xs text-center text-gray-700 dark:text-gray-300">
                     {user.name}
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 text-start">
+                  <TableCell className="px-6 py-4 text-xs text-center text-gray-700 dark:text-gray-300">
                     {user.email}
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 text-start">
+                  <TableCell className="px-6 py-4 text-xs text-center text-gray-700 dark:text-gray-300">
                     {user.role}
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 text-start">
+                  <TableCell className="px-6 py-4 text-xs text-center text-gray-700 dark:text-gray-300">
                     <Badge size="sm" color={getBadgeColor(user.status)}>
                       {user.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 text-start">
+                  <TableCell className="px-6 py-4 text-xs text-center text-gray-700 dark:text-gray-300">
                     <button
                       onClick={() => handleEdit(user)}
                       className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
@@ -230,7 +233,7 @@ export default function UserManagementTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4 text-gray-500 dark:text-gray-400">
+                <TableCell className="px-6 py-4 text-xs text-gray-700 dark:text-gray-300">
                   No users found
                 </TableCell>
               </TableRow>
@@ -253,7 +256,7 @@ export default function UserManagementTable() {
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(currentPage - 1)}
-              className="w-8 h-8 text-xs font-medium text-white bg-blue-700 rounded-full hover:bg-blue-800"
+              className="w-8 h-8 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800"
             >
               &lt;
             </button>
@@ -261,10 +264,10 @@ export default function UserManagementTable() {
               <button
                 key={index}
                 onClick={() => setCurrentPage(index + 1)}
-                className={`w-8 h-8 text-xs font-medium rounded-full ${
+                className={`w-8 h-8 text-xs font-semibold rounded-lg border transition ${
                   currentPage === index + 1
-                    ? "bg-blue-700 text-white"
-                    : "bg-white text-blue-700"
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white text-blue-600 border-gray-300 hover:bg-blue-100"
                 }`}
               >
                 {index + 1}
@@ -273,7 +276,7 @@ export default function UserManagementTable() {
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(currentPage + 1)}
-              className="w-8 h-8 text-xs font-medium text-white bg-blue-700 rounded-full hover:bg-blue-800"
+              className="w-8 h-8 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800"
             >
               &gt;
             </button>
@@ -285,6 +288,7 @@ export default function UserManagementTable() {
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center">
             <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-5 rounded w-96">
               <h2 className="text-lg font-semibold mb-3">Add User</h2>
+              <label>Name</label>
               <input
                 type="text"
                 value={form.name}
@@ -292,6 +296,7 @@ export default function UserManagementTable() {
                 placeholder="Name"
                 className="w-full mb-2 p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               />
+              <label>Username</label>
               <input
                 type="email"
                 value={form.email}
@@ -299,13 +304,18 @@ export default function UserManagementTable() {
                 placeholder="Email"
                 className="w-full mb-2 p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               />
-              <input
-                type="text"
+              <label>Role</label>
+              <select
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
-                placeholder="Role"
                 className="w-full mb-2 p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
+              >
+                <option value="">Select Role</option>
+                <option value="Admin">Admin</option>
+                <option value="Staff">Staff</option>
+                <option value="Manager">Manager</option>
+              </select>
+              <label>Status</label>
               <select
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
@@ -314,6 +324,7 @@ export default function UserManagementTable() {
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
+              <label>Password</label>
               <input
                 type="password"
                 value={form.password || ""}

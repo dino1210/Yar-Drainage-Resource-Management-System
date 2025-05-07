@@ -45,6 +45,13 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (!user || Object.keys(user).length === 0) {
+      console.error("User is not valid in localStorage.");
+      return;
+    }
+
 
     const form = new FormData();
     form.append("name", formData.name);
@@ -54,9 +61,7 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
     form.append("description", formData.description);
     form.append("remarks", formData.remarks);
     form.append("status", formData.status);
-    const actualUser = localStorage.getItem("username") || "Unknown";
-    console.log(" Username from localStorage:", actualUser);
-    form.append("added_by", actualUser);
+    form.append("created_by", user.name);
 
 
 
@@ -112,7 +117,7 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
     setFormData((prevData) => {
       let updatedStatus = prevData.status;
 
-      if (name === "remarks") {
+      if (name === "remarks") { 
         const val = value.toLowerCase();
         if (val.includes("need maintenance")) {
           updatedStatus = "Not Available";

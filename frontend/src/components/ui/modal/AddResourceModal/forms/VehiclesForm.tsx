@@ -44,6 +44,13 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess, vehicl
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (!user || Object.keys(user).length === 0) {
+      console.error("User is not valid in localStorage.");
+      return;
+    }
+
     const form = new FormData();
     form.append("name", formData.name);
     form.append("brand", formData.brand);
@@ -54,6 +61,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess, vehicl
     form.append("remarks", formData.remarks);
     form.append("assigned_driver", formData.assigned_driver);
     form.append("status", formData.status);
+    form.append("created_by", user.name);
 
     if (formData.acquisition_date) {
       form.append("acquisition_date", formData.acquisition_date.toISOString().split("T")[0]);

@@ -8,5 +8,6 @@ router.get("/", projectController.getAllProjects);
 router.get("/recent", projectController.getRecentProjects);
 router.put("/update-status/:project_id", projectController.updateProjectStatus);
 router.get("/:id", projectController.getProjectById);
+router.delete("/delete/:project_id", projectController.deleteProject);
 
 module.exports = router;
