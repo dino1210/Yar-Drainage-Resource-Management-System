@@ -56,7 +56,8 @@ type Project = {
 export default function Projects() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null); // For view
+  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null); // For edit
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
@@ -80,18 +81,20 @@ export default function Projects() {
     fetchProjects();
   }, []);
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    fetchProjects();
-  };
 
   const handleViewProject = (project: Project) => {
     setSelectedProject(project);
   };
 
+  const handleEditProject = (project: Project) => {
+    setProjectToEdit(project);
+    setIsModalOpen(true);
+    console.log(project);
+  };
+
   const handleDeleteProject = (project: Project) => {
     setProjectToDelete(project);
-    setIsDeleteModalOpen(true); 
+    setIsDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -113,18 +116,13 @@ export default function Projects() {
         alert("There was an error deleting the project.");
       }
 
-      setIsDeleteModalOpen(false); 
+      setIsDeleteModalOpen(false);
     }
   };
 
   const handleCloseDeleteModal = () => {
-    setIsModalOpen(false); 
-    setProjectToDelete(null); 
-  };
-
-  const handleEditProject = (project: Project) => {
-    setIsModalOpen(true);
-    console.log(project);
+    setIsModalOpen(false);
+    setProjectToDelete(null);
   };
 
   const handleStatusChange = async (newStatus: string) => {
@@ -134,7 +132,7 @@ export default function Projects() {
           `${import.meta.env.VITE_API_BASE_URL}/api/projects/update-status/${
             selectedProject.project_id
           }`,
-          { manual_status: newStatus }
+          { project_status: newStatus }
         );
 
         setSelectedProject({
@@ -143,12 +141,12 @@ export default function Projects() {
         });
 
         setSelectedProject(null);
-        toast.success(`Project has been successfully ${newStatus}`)
+        toast.success(`Project has been successfully ${newStatus}`);
         fetchProjects();
       } catch {
         toast.error(`Error updating project status to ${newStatus}`);
       }
-      setIsModalOpen(false)
+      setIsModalOpen(false);
     }
   };
 
@@ -302,7 +300,9 @@ export default function Projects() {
                         {(project.project_status === "Upcoming" ||
                           project.project_status === "On-Going") && (
                           <button
-                            onClick={() => handleEditProject(project)}
+                            onClick={() => {
+                              handleEditProject(project);
+                            }}
                             className="flex items-center text-blue-500 hover:text-blue-400 py-0.5 transition"
                           >
                             <Edit className="w-4.5" />
@@ -337,7 +337,15 @@ export default function Projects() {
             </div>
           )}
         </div>
-        <AddProjectModal isOpen={isModalOpen} onClose={handleCloseModal} />
+        <AddProjectModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setProjectToEdit(null);
+            fetchProjects();
+          }}
+          project={projectToEdit}
+        />
         {selectedProject && (
           <div className="fixed inset-0 z-99999 flex items-center justify-center bg-black/50">
             <div className="relative z-10 w-full max-w-[45vw] overflow-y-auto rounded-xl bg-white px-5 py-4 shadow-lg dark:bg-gray-900">
@@ -625,42 +633,43 @@ export default function Projects() {
                   </div>
 
                   {selectedProject.project_status !== "Cancelled" &&
- selectedProject.project_status !== "Completed" && (
-  <div className="mt-5 flex justify-center w-full">
-    <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-gray-900 sm:px-6 mr-5">
-      <div className="flex gap-3">
-        {selectedProject.project_status === "Upcoming" ? (
-          <button
-            onClick={() => handleStatusChange("Cancelled")}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-white transition shadow-sm"
-          >
-            <XCircle className="w-4 h-4" />
-            Cancel Project
-          </button>
-        ) : (
-          <>
-            <button
-              onClick={() => handleStatusChange("Completed")}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-white transition shadow-sm"
-            >
-              <CheckCircle className="w-4 h-4" />
-              Mark as Complete
-            </button>
+                    selectedProject.project_status !== "Completed" && (
+                      <div className="mt-5 flex justify-center w-full">
+                        <div className="rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-gray-900 sm:px-6 mr-5">
+                          <div className="flex gap-3">
+                            {selectedProject.project_status === "Upcoming" ? (
+                              <button
+                                onClick={() => handleStatusChange("Cancelled")}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-white transition shadow-sm"
+                              >
+                                <XCircle className="w-4 h-4" />
+                                Cancel Project
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() =>
+                                    handleStatusChange("Completed")
+                                  }
+                                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-white transition shadow-sm"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                  Mark as Complete
+                                </button>
 
-            <button
-              onClick={() => handleStatusChange("Extended")}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 hover:bg-yellow-200 text-yellow-700 dark:bg-yellow-800 dark:hover:bg-yellow-700 dark:text-white transition shadow-sm"
-            >
-              <RefreshCcw className="w-4 h-4" />
-              Extend Project
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  </div>
-)}
-
+                                <button
+                                  onClick={() => handleStatusChange("Extended")}
+                                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 hover:bg-yellow-200 text-yellow-700 dark:bg-yellow-800 dark:hover:bg-yellow-700 dark:text-white transition shadow-sm"
+                                >
+                                  <RefreshCcw className="w-4 h-4" />
+                                  Extend Project
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>

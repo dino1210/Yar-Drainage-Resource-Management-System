@@ -24,6 +24,7 @@ const consumablesLogsRoutes = require("./routes/consumablesLogsRoutes");
 const vehiclesLogsRoutes = require("./routes/vehiclesLogsRoutes"); // 
 const metricsRoutes = require("./routes/metricsRoutes");
 const projectRoutes = require("./routes/projectRoutes");
+const toolLogRoutes = require("./routes/toolsLogsRoutes")
 
 //  Reports
 const reportConsumablesRoutes = require("./routes/reportConsumable_Route");
@@ -60,11 +61,13 @@ app.post("/api/projects", (req, res, next) => {
   next(); 
 });
 app.use("/api/metrics", metricsRoutes);
+app.use("/api/tool-logs", toolLogRoutes);
 
 // Reports
 app.use("/api/report-consumables", reportConsumablesRoutes);
 app.use("/api/report-tools", reportToolsRoutes);
 app.use("/api/report-vehicles", reportVehiclesRoutes);
+
 
 //  Start server
 const PORT = process.env.PORT || 5000;

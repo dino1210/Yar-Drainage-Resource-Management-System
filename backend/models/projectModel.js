@@ -1,12 +1,26 @@
 const db = require("../config/db");
 const cron = require("node-cron");
 
-// CREATE PROJECT
 const createProject = async (projectData) => {
+  console.log('Received projectData:', projectData);  // Debugging line
+
+  const today = new Date();
+  const startDate = new Date(projectData.start_date);
+  const endDate = new Date(projectData.end_date);
+
+  // Determine project status
+  let project_status = null;
+  if (today < startDate) {
+    project_status = 'Upcoming';
+  } else if (today >= startDate && today <= endDate) {
+    project_status = 'On-Going';
+  } else if (today > endDate) {
+    project_status = 'Completed';
+  }
 
   const query = `
-    INSERT INTO projects (name, person_in_charge, location, description, start_date, end_date, created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO projects (name, person_in_charge, location, description, start_date, end_date, created_by, project_status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const values = [
     projectData.name,
@@ -16,10 +30,30 @@ const createProject = async (projectData) => {
     projectData.start_date,
     projectData.end_date,
     projectData.created_by,
+    project_status,
   ];
 
   try {
     const [results] = await db.query(query, values);
+    const projectId = results.insertId;
+
+    // Fallback-safe assignments
+    const tool_ids = projectData.tool_ids || [];
+    const start_date = projectData.start_date || '';
+    const created_by = projectData.created_by || 'Unknown';
+    const projectName = projectData.name || 'Untitled Project';
+
+    console.log("→ Calling linkToolsToProject with:", {
+      projectId,
+      tool_ids,
+      start_date,
+      created_by,
+      projectName,
+    });
+
+    // Link tools to the project and update their status
+    await linkToolsToProject(projectId, tool_ids, start_date, created_by, projectName);
+
     return results;
   } catch (error) {
     console.error("Error creating project:", error.message);
@@ -27,53 +61,64 @@ const createProject = async (projectData) => {
   }
 };
 
-// Function to update resource status based on project status
-const updateResourceStatus = async (projectId, projectStatus) => {
-  let resourceStatus = '';
 
-  // Determine resource status based on project status
-  if (projectStatus === 'Upcoming') {
-    resourceStatus = 'Reserved';
-  } else if (projectStatus === 'On-going') {
-    resourceStatus = 'Issued-out';
-  } else if (projectStatus === 'Completed') {
-    resourceStatus = 'Available';
-  }
-
-  // Update tool status
-  const updateToolQuery = `UPDATE tools SET status = ? WHERE project_id = ?`;
-  const updateConsumableQuery = `UPDATE consumables SET status = ? WHERE project_id = ?`;
-  const updateVehicleQuery = `UPDATE vehicles SET status = ? WHERE project_id = ?`;
-
-  try {
-    await db.query(updateToolQuery, [resourceStatus, projectId]);
-    await db.query(updateConsumableQuery, [resourceStatus, projectId]);
-    await db.query(updateVehicleQuery, [resourceStatus, projectId]);
-    console.log(`Resources for Project ${projectId} updated to ${resourceStatus}`);
-  } catch (error) {
-    console.error("Error updating resource status:", error.message);
-    throw error;
-  }
-};
-
-// Function to link tools to project and update their status periodically
-const linkToolsToProject = async (projectId, tools, projectStartDate) => {
+const linkToolsToProject = async (projectId, tools, projectStartDate, createdBy, projectName) => {
   if (!Array.isArray(tools) || tools.length === 0) return;
+
+  console.log("→ Inside linkToolsToProject - createdBy:", createdBy);  // Debugging line
+  console.log("→ Inside linkToolsToProject - projectName:", projectName);  // Debugging line
 
   const values = tools.map((id) => [projectId, parseInt(id)]);
   const placeholders = values.map(() => "(?, ?)").join(", ");
   const flatValues = values.flat();
 
-  const query = `INSERT INTO project_tools (project_id, tool_id) VALUES ${placeholders}`;
+  const insertQuery = `INSERT INTO project_tools (project_id, tool_id) VALUES ${placeholders}`;
 
   try {
-    const [results] = await db.query(query, flatValues);
-    return results;
+    const [insertResults] = await db.query(insertQuery, flatValues);
+
+    const startDate = new Date(projectStartDate);
+    const today = new Date();
+    const isSameDay =
+      today.getFullYear() === startDate.getFullYear() &&
+      today.getMonth() === startDate.getMonth() &&
+      today.getDate() === startDate.getDate();
+
+    let toolStatus = '';
+    if (today < startDate) {
+      toolStatus = 'Reserved';
+    } else if (isSameDay || today > startDate) {
+      toolStatus = 'Issued-Out';
+    }
+
+    const updateAndLogPromises = tools.map(async (toolId) => {
+      // Update tool status
+      await db.query(`UPDATE tools SET status = ? WHERE tool_id = ?`, [toolStatus, toolId]);
+
+      // Fetch tool name and tag
+      const [[toolData]] = await db.query(`SELECT name, tag FROM tools WHERE tool_id = ?`, [toolId]);
+
+      const sanitizedCreatedBy = (createdBy || "Unknown").trim();
+      const remarks = `Tool ${toolStatus.toLowerCase()} for Project: ${projectName} (ID: ${projectId})`;
+
+      // Insert log with name and tag
+      await db.query(
+        `INSERT INTO tool_logs (tool_id, tool_name, tag, action, action_by, date, remarks)
+         VALUES (?, ?, ?, ?, ?, NOW(), ?)`,
+        [toolId, toolData.name, toolData.tag, toolStatus, sanitizedCreatedBy, remarks]
+      );
+    });
+
+    await Promise.all(updateAndLogPromises);
+
+    return insertResults;
   } catch (error) {
     console.error("Error linking tools:", error.message);
     throw error;
   }
 };
+
+
 
 // LINK CONSUMABLES AND UPDATE QUANTITY
 const linkConsumablesToProject = async (projectId, consumables) => {
@@ -103,24 +148,8 @@ const linkConsumablesToProject = async (projectId, consumables) => {
   }
 };
 
-// Function to update vehicle status
-const updateVehicleStatus = async (vehicleId, projectStartDate) => {
-  const currentDate = new Date();
-  const status = currentDate < new Date(projectStartDate) ? "Reserved" : "Issued-out";
 
-  const query = `UPDATE vehicles SET status = ? WHERE vehicle_id = ?`;
-  const values = [status, vehicleId];
-
-  try {
-    await db.query(query, values);
-    console.log(`Vehicle ${vehicleId} status updated to ${status}`);
-  } catch (error) {
-    console.error("Error updating vehicle status:", error.message);
-    throw error;
-  }
-};
-
-// Function to link vehicles to project and update their status periodically
+// Function to link vehicles to project and update their status
 const linkVehiclesToProject = async (projectId, vehicles, projectStartDate) => {
   if (!Array.isArray(vehicles) || vehicles.length === 0) return;
 
@@ -128,16 +157,95 @@ const linkVehiclesToProject = async (projectId, vehicles, projectStartDate) => {
   const placeholders = values.map(() => "(?, ?)").join(", ");
   const flatValues = values.flat();
 
-  const query = `INSERT INTO project_vehicles (project_id, vehicle_id) VALUES ${placeholders}`;
+  const insertQuery = `INSERT INTO project_vehicles (project_id, vehicle_id) VALUES ${placeholders}`;
 
   try {
-    const [results] = await db.query(query, flatValues);
-    return results;
+    const [insertResults] = await db.query(insertQuery, flatValues);
+
+    const startDate = new Date(projectStartDate);
+    const today = new Date();
+
+    const isSameDay =
+      today.getFullYear() === startDate.getFullYear() &&
+      today.getMonth() === startDate.getMonth() &&
+      today.getDate() === startDate.getDate();
+
+    let vehicleStatus = '';
+    if (today < startDate) {
+      vehicleStatus = 'Reserved';
+    } else if (isSameDay || today > startDate) {
+      vehicleStatus = 'Issued-out';
+    }
+
+    const updatePromises = vehicles.map((vehicleId) => {
+      const updateQuery = `UPDATE vehicles SET status = ? WHERE vehicle_id = ?`;
+      return db.query(updateQuery, [vehicleStatus, vehicleId]);
+    });
+
+    await Promise.all(updatePromises);
+
+    return insertResults;
   } catch (error) {
     console.error("Error linking vehicles:", error.message);
     throw error;
   }
 };
+
+const updateProject = async (project_id, projectData) => {
+  const today = new Date();
+  const startDate = new Date(projectData.start_date);
+  const endDate = new Date(projectData.end_date);
+
+  // Determine updated project status
+  let project_status = null;
+  if (today < startDate) {
+    project_status = 'Upcoming';
+  } else if (today >= startDate && today <= endDate) {
+    project_status = 'On-Going';
+  } else if (today > endDate) {
+    project_status = 'Completed';
+  }
+
+  const query = `
+    UPDATE projects
+    SET name = ?, person_in_charge = ?, location = ?, description = ?, start_date = ?, end_date = ?, created_by = ?, project_status = ?
+    WHERE project_id = ?
+  `;
+  const values = [
+    projectData.name,
+    projectData.person_in_charge,
+    projectData.location,
+    projectData.description,
+    projectData.start_date,
+    projectData.end_date,
+    projectData.created_by,
+    project_status,
+    project_id,
+  ];
+
+  try {
+    await db.query(query, values);
+
+    // Sanitize incoming arrays for tools, consumables, and vehicles
+    const validToolIds = (projectData.tool_ids || []).filter(id => id !== undefined && id !== null);
+    const validConsumableIds = (projectData.consumable_ids || []).filter(id => id !== undefined && id !== null);
+    const validVehicleIds = (projectData.vehicle_ids || []).filter(id => id !== undefined && id !== null);
+
+    // Add new tools to the project if they aren't already linked
+    await addNewToolsToProject(project_id, validToolIds, startDate);
+
+    // Optionally, link consumables and vehicles as well
+    await linkConsumablesToProject(project_id, validConsumableIds);
+    await linkVehiclesToProject(project_id, validVehicleIds, startDate);
+
+    return { success: true, message: 'Project updated successfully' };
+  } catch (error) {
+    console.error("Error updating project:", error.message);
+    throw error;
+  }
+};
+
+
 
 
 const getAllProjects = async () => {
@@ -173,7 +281,7 @@ const getAllProjects = async () => {
       v.remarks AS vehicle_remarks,
       v.plate_no AS vehicle_plate_no,
       v.assigned_driver AS vehicle_assigned_driver
-    FROM project_status_view p
+    FROM projects p
     LEFT JOIN project_tools pt ON pt.project_id = p.project_id
     LEFT JOIN tools t ON t.tool_id = pt.tool_id
     LEFT JOIN project_consumables pc ON pc.project_id = p.project_id
@@ -257,7 +365,7 @@ const getRecentProjects = async () => {
       created_at,
       created_by,
       project_status
-    FROM project_status_view
+    FROM projects
     ORDER BY created_at DESC
     LIMIT 5
   `;
@@ -286,15 +394,44 @@ const getProjectById = async (projectId) => {
 
 // UPDATE STATUS
 const updateProjectStatus = async (project_id, newStatus) => {
-  const query = `UPDATE projects SET manual_status = ? WHERE project_id = ?`;
+  const updateQuery = `UPDATE projects SET project_status = ? WHERE project_id = ?`;
 
   try {
-    const [result] = await db.query(query, [newStatus, project_id]); // MySQL2 returns [rows, fields]
+    const [result] = await db.query(updateQuery, [newStatus, project_id]);
+
+    if (newStatus === 'Cancelled' || newStatus === 'Completed') {
+      // Revert tool statuses to 'Available'
+      const revertToolsQuery = `
+        UPDATE tools
+        SET status = 'Available'
+        WHERE tool_id IN (
+          SELECT tool_id FROM project_tools WHERE project_id = ?
+        )
+      `;
+
+      // Revert vehicle statuses to 'Available'
+      const revertVehiclesQuery = `
+        UPDATE vehicles
+        SET status = 'Available'
+        WHERE vehicle_id IN (
+          SELECT vehicle_id FROM project_vehicles WHERE project_id = ?
+        )
+      `;
+
+      await Promise.all([
+        db.query(revertToolsQuery, [project_id]),
+        db.query(revertVehiclesQuery, [project_id])
+      ]);
+    }
+
     return result;
   } catch (error) {
+    console.error("Error updating project status:", error.message);
     throw error;
   }
 };
+
+
 
 //DELETE PROJECT
 const deleteProject = async (project_id) => {
@@ -319,4 +456,5 @@ module.exports = {
   updateProjectStatus,
   getProjectById,
   deleteProject,
+  updateProject
 };

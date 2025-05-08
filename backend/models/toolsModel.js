@@ -76,6 +76,14 @@ const addTool = async (toolData) => {
     const updateQuery = `UPDATE tools SET qr = ? WHERE tool_id = ?`;
     await db.query(updateQuery, [qrPublicPath, toolId]);
 
+    const logQuery = `
+    INSERT INTO tool_logs (tool_id, action, action_by, date, remarks, tool_name, tag)
+    VALUES (?, 'Added', ?, NOW(), ?, ?, ?)
+  `;
+  await db.query(logQuery, [toolId, created_by, remarks || '', name, tag]);
+  
+  
+
     return {
       tool_id: toolId,
       qr_code_id: qrCodeId,

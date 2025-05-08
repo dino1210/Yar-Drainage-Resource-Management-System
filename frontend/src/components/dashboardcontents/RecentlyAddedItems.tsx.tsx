@@ -1,41 +1,56 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import Badge from "../ui/badge/Badge";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 
-// Define the TypeScript interface for the table rows
-interface Product {
-  id: number; // Unique identifier for each product
-  name: string; // Product name
-  variants: string; // Number of variants (e.g., "1 Variant", "2 Variants")
-  category: string; // Category of the product
-  price: string; // Price of the product (as a string with currency symbol)
-  // status: string; // Status of the product
-  image: string; // URL or path to the product image
-  status: "Delivered" | "Pending" | "Canceled"; // Status of the product
+interface Activity {
+  id: number;
+  name: string;
+  tag: string;
+  action: string;
+  actionBy: string;
+  date: string;
 }
 
-// Define the table data using the interface
-const tableData: Product[] = [
-  
-];
-
 export default function RecentlyAddedItems() {
+  const [activities, setActivities] = useState<Activity[]>([]); // State for storing fetched activities
+  const [loading, setLoading] = useState(true); // Loading state
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch data from multiple API endpoints
+        const [toolLogs, consumableLogs, vehicleLogs, projectLogs] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tool-logs`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/consumable-logs`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/vehicle-logs`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/projects/recent`)
+        ]);
+
+        // Combine all fetched logs into a single array
+        const combinedData = [
+          ...toolLogs.data,
+          ...consumableLogs.data,
+          ...vehicleLogs.data,
+          ...projectLogs.data
+        ];
+
+        // Set the combined data to the state
+        setActivities(combinedData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array to run the effect only on component mount
+
   return (
     <div className="overflow-hidden h-full rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Recently Added Items
-          </h3>
-        </div>
-
-        <div className="flex items-center gap-3">
-
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Recent Activities</h3>
         </div>
       </div>
       <div className="max-w-full overflow-x-auto">
@@ -43,79 +58,29 @@ export default function RecentlyAddedItems() {
           {/* Table Header */}
           <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
             <TableRow>
-              <TableCell
-                isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Item
-              </TableCell>
-              <TableCell
-                isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Tag
-              </TableCell>
-              <TableCell
-                isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Added By
-              </TableCell>
-              <TableCell
-                isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Date
-              </TableCell>
+              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Item</TableCell>
+              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Action</TableCell>
+              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Action By</TableCell>
+              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Date</TableCell>
             </TableRow>
           </TableHeader>
 
           {/* Table Body */}
-
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {tableData.map((product) => (
-              <TableRow key={product.id} className="">
-                <TableCell className="py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
-                      <img
-                        src={product.image}
-                        className="h-[50px] w-[50px]"
-                        alt={product.name}
-                      />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                        {product.name}
-                      </p>
-                      <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                        {product.variants}
-                      </span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {product.price}
-                </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {product.category}
-                </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  <Badge
-                    size="sm"
-                    color={
-                      product.status === "Delivered"
-                        ? "success"
-                        : product.status === "Pending"
-                        ? "warning"
-                        : "error"
-                    }
-                  >
-                    {product.status}
-                  </Badge>
-                </TableCell>
+            {loading ? (
+              <TableRow>
+                <TableCell className="text-center py-4">Loading...</TableCell>
               </TableRow>
-            ))}
+            ) : (
+              activities.map((activity) => (
+                <TableRow key={activity.id}>
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">{activity.tag}</TableCell>
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">{activity.action}</TableCell>
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">{activity.actionBy}</TableCell>
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">{new Date(activity.date).toLocaleDateString()}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

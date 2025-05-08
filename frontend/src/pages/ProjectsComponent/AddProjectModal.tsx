@@ -1,5 +1,5 @@
 // AddProjectModal.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -147,7 +147,7 @@ const AddProjectModal: React.FC<Props> = ({ isOpen, onClose, project }) => {
       let response;
       if (project) {
         response = await axios.put(
-          `${import.meta.env.VITE_API_BASE_URL}/api/projects/${project.id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/api/projects/update/${project.project_id}`,
           projectData
         );
       } else {
@@ -225,6 +225,23 @@ const AddProjectModal: React.FC<Props> = ({ isOpen, onClose, project }) => {
       });
     }
   };
+
+  useEffect(() => {
+    if (project) {
+      setStartDate(project.start_date ? new Date(project.start_date) : null);
+      setEndDate(project.end_date ? new Date(project.end_date) : null);
+      setName(project.name || "");
+      setPersonInCharge(project.person_in_charge || "");
+      setLocation(project.location || "");
+      setDescription(project.description || "");
+      setSelectedTools(project.tools || []);
+      setSelectedConsumables(project.consumables || []);
+      setSelectedVehicles(project.vehicles || []);
+    } else {
+      clearForm(); // If creating new, reset the form
+    }
+  }, [project]);
+  
 
   if (!isOpen) return null;
   return (
