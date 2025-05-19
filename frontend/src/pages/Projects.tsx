@@ -81,7 +81,6 @@ export default function Projects() {
     fetchProjects();
   }, []);
 
-
   const handleViewProject = (project: Project) => {
     setSelectedProject(project);
   };
@@ -155,9 +154,9 @@ export default function Projects() {
       <PageMeta title="Projects" description="" />
       <PageBreadcrumb pageTitle="Projects" />
 
-      <div className="min-h-full rounded-2xl border border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-8">
-        <div className="rounded-xl border w-full border-gray-200 p-4 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-          <div className="sticky top-0 overflow-x-auto z-10 px-5 py-3 flex flex-col sm:flex-row gap-2 shadow-sm">
+      <div className="min-h-full overflow-x-hidden rounded-2xl border border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-8">
+        <div className="rounded-xl overflow-x-auto max-h-[62vh] border w-full border-gray-200 p-4 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] scrollbar-thin dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800 scrollbar-rounded">
+          <div className="top-0 overflow-x-auto z-10 px-5 py-3 flex flex-col sm:flex-row gap-2 shadow-sm">
             {/* Search Bar */}
             <input
               type="text"
@@ -198,15 +197,11 @@ export default function Projects() {
           </div>
           <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
 
-          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-4"></div>
-          </div>
-
           {/* Project Cards */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-1">
             {projects
               .filter((project) => {
-                const status = project.project_status; // Directly using project_status from backend
+                const status = project.project_status;
                 const statusMatch =
                   statusFilter === "All" || status === statusFilter;
                 return statusMatch;
@@ -220,7 +215,7 @@ export default function Projects() {
                 return (
                   <div
                     key={project.project_id}
-                    className={`cursor-pointer rounded-xl border border-gray-200 border-b-4 bg-white p-5 shadow-md transition hover:shadow-lg dark:border-gray-700 dark:border-b-4 dark:bg-white/[0.05] ${
+                    className={`relative flex flex-col justify-between rounded-xl border border-gray-200 border-b-4 bg-white p-4 shadow-md transition hover:shadow-lg dark:border-gray-700 dark:bg-white/[0.05] ${
                       project.project_status === "Upcoming"
                         ? "border-b-green-600 dark:border-b-green-400"
                         : project.project_status === "On-Going"
@@ -236,96 +231,105 @@ export default function Projects() {
                         : "border-b-gray-300"
                     }`}
                   >
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                      {project.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-300">
-                      {project.location}
-                    </p>
-                    <p className="mt-2 text-xs text-gray-400">
-                      {new Date(project.start_date).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}{" "}
-                      →{" "}
-                      {new Date(project.end_date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </p>
-                    <p className="mt-2 text-xs text-gray-400">
-                      Date Created:&nbsp;
-                      {new Date(project.created_at).toLocaleDateString(
-                        "en-US",
-                        { year: "numeric", month: "long", day: "numeric" }
-                      )}{" "}
-                    </p>
-                    <p className="mt-1 text-xs text-gray-400">
-                      Created By:&nbsp;
-                      {project.created_by}
-                    </p>
-                    <div className="mt-4 flex justify-between items-center">
-                      <span
-                        className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                          project.project_status === "Upcoming"
-                            ? "bg-green-500/10 text-green-600 dark:bg-green-400/10 dark:text-green-400"
-                            : project.project_status === "On-Going"
-                            ? "bg-yellow-400/10 text-yellow-700 dark:bg-yellow-300/10 dark:text-yellow-300"
-                            : project.project_status === "Completed"
-                            ? "bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400"
-                            : project.project_status === "Cancelled"
-                            ? "bg-red-500/10 text-red-600 dark:bg-red-400/10 dark:text-red-400"
-                            : project.project_status === "Extended"
-                            ? "bg-purple-500/10 text-purple-600 dark:bg-purple-400/10 dark:text-purple-400"
-                            : project.project_status === "Overtime"
-                            ? "bg-orange-500/10 text-orange-600 dark:bg-orange-400/10 dark:text-orange-400"
-                            : "bg-gray-200 text-gray-800"
-                        }`}
+                    {/* STATUS BADGE */}
+                    <span
+                      className={`absolute top-4 right-4 z-10 rounded-full px-3 py-1 text-xs font-semibold ${
+                        project.project_status === "Upcoming"
+                          ? "bg-green-500/10 text-green-600 dark:bg-green-400/10 dark:text-green-400"
+                          : project.project_status === "On-Going"
+                          ? "bg-yellow-400/10 text-yellow-700 dark:bg-yellow-300/10 dark:text-yellow-300"
+                          : project.project_status === "Completed"
+                          ? "bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400"
+                          : project.project_status === "Cancelled"
+                          ? "bg-red-500/10 text-red-600 dark:bg-red-400/10 dark:text-red-400"
+                          : project.project_status === "Extended"
+                          ? "bg-purple-500/10 text-purple-600 dark:bg-purple-400/10 dark:text-purple-400"
+                          : project.project_status === "Overtime"
+                          ? "bg-orange-500/10 text-orange-600 dark:bg-orange-400/10 dark:text-orange-400"
+                          : "bg-gray-200 text-gray-800"
+                      }`}
+                    >
+                      {project.project_status}
+                    </span>
+
+                    {/* CARD CONTENT */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                        {project.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-300">
+                        {project.location}
+                      </p>
+                      <p className="mt-2 text-xs text-gray-400">
+                        {new Date(project.start_date).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}{" "}
+                        →{" "}
+                        {new Date(project.end_date).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                      </p>
+                      <p className="mt-2 text-xs text-gray-400">
+                        Date Created:&nbsp;
+                        {new Date(project.created_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-400">
+                        Created By:&nbsp;
+                        {project.created_by}
+                      </p>
+                    </div>
+
+                    {/* ACTION BUTTONS */}
+                    <div className="absolute bottom-4 right-5 z-10 flex justify-end gap-2">
+                      <button
+                        onClick={() => handleViewProject(project)}
+                        className="flex items-center text-green-500 hover:text-gray-400 transition"
                       >
-                        {project.project_status}
-                      </span>
-                      <div className="flex gap-2">
+                        <Eye className="w-6 h-6" />
+                      </button>
+
+                      {(project.project_status === "Upcoming" ||
+                        project.project_status === "On-Going") && (
                         <button
-                          onClick={() => handleViewProject(project)}
-                          className="flex items-center text-green-500 hover:text-gray-400 py-0.5 transition"
+                          onClick={() => handleEditProject(project)}
+                          className="flex items-center text-blue-500 hover:text-blue-400 transition"
                         >
-                          <Eye className="w-7" />
+                          <Edit className="w-5 h-5" />
                         </button>
+                      )}
 
-                        {(project.project_status === "Upcoming" ||
-                          project.project_status === "On-Going") && (
-                          <button
-                            onClick={() => {
-                              handleEditProject(project);
-                            }}
-                            className="flex items-center text-blue-500 hover:text-blue-400 py-0.5 transition"
-                          >
-                            <Edit className="w-4.5" />
-                          </button>
-                        )}
+                      {project.project_status === "Cancelled" && (
+                        <button
+                          onClick={() => handleDeleteProject(project)}
+                          className="flex items-center text-red-500 hover:text-red-400 transition"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      )}
 
-                        {project.project_status === "Cancelled" && (
-                          <div key={project.project_id}>
-                            <button
-                              onClick={() => handleDeleteProject(project)}
-                              className="flex items-center text-red-500 hover:text-red-400 py-0.5 transition"
-                            >
-                              <Trash2 className="w-4.5" />
-                            </button>
-                          </div>
-                        )}
-                        <DeleteModal
-                          isOpen={isDeleteModalOpen}
-                          onClose={handleCloseDeleteModal}
-                          onConfirm={handleConfirmDelete}
-                          itemName={projectToDelete?.name}
-                        />
-                      </div>
+                      <DeleteModal
+                        isOpen={isDeleteModalOpen}
+                        onClose={handleCloseDeleteModal}
+                        onConfirm={handleConfirmDelete}
+                        itemName={projectToDelete?.name}
+                      />
                     </div>
                   </div>
                 );

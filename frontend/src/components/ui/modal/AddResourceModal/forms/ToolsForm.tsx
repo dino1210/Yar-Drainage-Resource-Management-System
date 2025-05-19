@@ -12,9 +12,16 @@ type ToolFormProps = {
   toolToEdit?: any;
 };
 
-const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }) => {
+const ToolForm: React.FC<ToolFormProps> = ({
+  onClose,
+  onAddSuccess,
+  toolToEdit,
+}) => {
   useEffect(() => {
-    console.log(" Current USER from localStorage:", localStorage.getItem("username"));
+    console.log(
+      " Current USER from localStorage:",
+      localStorage.getItem("username")
+    );
   }, []);
 
   const [formData, setFormData] = useState({
@@ -35,13 +42,23 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
       setFormData({
         ...toolToEdit,
         picture: null,
-        purchase_date: toolToEdit.purchase_date ? new Date(toolToEdit.purchase_date) : null,
+        purchase_date: toolToEdit.purchase_date
+          ? new Date(toolToEdit.purchase_date)
+          : null,
         warranty: toolToEdit.warranty ? new Date(toolToEdit.warranty) : null,
       });
     }
   }, [toolToEdit]);
 
+  const warrantyOptions = [
+    { label: "3 months", value: 3 },
+    { label: "6 months", value: 6 },
+    { label: "12 months", value: 12 },
+  ];
 
+  const [selectedWarrantyMonths, setSelectedWarrantyMonths] = useState<
+    number | null
+  >(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +69,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
       return;
     }
 
-
     const form = new FormData();
     form.append("name", formData.name);
     form.append("brand", formData.brand);
@@ -62,10 +78,6 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
     form.append("remarks", formData.remarks);
     form.append("status", formData.status);
     form.append("created_by", user.name);
-
-
-
-
 
     if (formData.purchase_date) {
       form.append(
@@ -78,13 +90,12 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
       form.append("warranty", formData.warranty.toISOString().split("T")[0]);
     }
 
-
     if (formData.picture) {
       form.append("picture", formData.picture);
     } else if (toolToEdit?.picture) {
       form.append("existing_picture", toolToEdit.picture);
     }
-    
+
     try {
       const apiUrl = toolToEdit
         ? `${import.meta.env.VITE_API_BASE_URL}/api/tools/${toolToEdit.tool_id}`
@@ -117,7 +128,7 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
     setFormData((prevData) => {
       let updatedStatus = prevData.status;
 
-      if (name === "remarks") { 
+      if (name === "remarks") {
         const val = value.toLowerCase();
         if (val.includes("need maintenance")) {
           updatedStatus = "Not Available";
@@ -134,6 +145,64 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
     });
   };
 
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const handleInputChangeCategory = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    setFormData({ ...formData, category: value });
+
+    if (value.trim().length === 0) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const filtered = categoryList
+      .filter((item) => item.toLowerCase().includes(value.toLowerCase()))
+      .slice(0, 5);
+
+    setSuggestions(filtered);
+    setShowSuggestions(true);
+  };
+
+  const handleSuggestionClick = (value: string) => {
+    setFormData({ ...formData, category: value });
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  const categoryList = [
+    "Angle Grinder",
+    "Drill Machine",
+    "Vertical Grinder",
+    "Pencil Grinder",
+    "Circular Saw",
+    "Chainsaw",
+    "Grass Cutter",
+    "Electric Drill",
+    "Portable Drill",
+    "Sanding Machine",
+    "Jackhammer",
+    "Vibrator",
+    "Pumps",
+    "Vacuum",
+    "Electric Blower",
+    "Light",
+    "Charger",
+    "Radio",
+    "Cement Mixer",
+    "Nail Gun",
+    "Heat Gun",
+    "Compressor",
+    "Ladder",
+    "Shovel",
+    "Body Harness",
+    "Traffic Cone",
+    "Hose",
+  ];
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -173,19 +242,36 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
           className="border rounded-md p-2 text-xs bg-white text-gray-700 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
         />
       </div>
-
       <div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Category
         </label>
-        <input
-          type="text"
-          name="category"
-          value={formData.category || ""}
-          onChange={handleInputChange}
-          required
-          className="border rounded-md p-2 text-xs bg-white text-gray-700 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
-        />
+
+        <div className="relative">
+          <input
+            type="text"
+            name="category"
+            value={formData.category}
+            onChange={handleInputChangeCategory}
+            autoComplete="off"
+            required
+            className="border rounded-md p-2 text-xs bg-white text-gray-700 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400 w-full"
+          />
+
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute left-0 top-full mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-gray-300 bg-white text-xs shadow-md dark:bg-gray-800 dark:text-white dark:border-gray-700 z-10">
+              {suggestions.slice(0, 2).map((suggestion, index) => (
+                <li
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="cursor-pointer px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col">
@@ -242,22 +328,53 @@ const ToolForm: React.FC<ToolFormProps> = ({ onClose, onAddSuccess, toolToEdit }
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Warranty
         </label>
-        <DatePicker
-          selected={formData.warranty}
-          onChange={(date: Date | null) =>
-            setFormData((prev) => ({
-              ...prev,
-              warranty: date,
-            }))
-          }
-          dateFormat="yyyy-MM-dd"
-          placeholderText="Select a date"
+        <select
           className="border rounded-md p-2 bg-white text-xs text-gray-700 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400 w-full"
-          calendarClassName="dark:bg-gray-700 dark:text-black"
-          showMonthDropdown
-          showYearDropdown
-          dropdownMode="select"
-        />
+          onChange={(e) => {
+            const months = parseInt(e.target.value, 10);
+            setSelectedWarrantyMonths(months);
+
+            if (formData.purchase_date) {
+              const newWarrantyDate = new Date(formData.purchase_date);
+              newWarrantyDate.setMonth(newWarrantyDate.getMonth() + months);
+              setFormData((prev) => ({
+                ...prev,
+                warranty: newWarrantyDate,
+              }));
+            } else {
+              setFormData((prev) => ({
+                ...prev,
+                warranty: null,
+              }));
+            }
+          }}
+          value={selectedWarrantyMonths ?? ""}
+          disabled={!formData.purchase_date}
+        >
+          <option value="" disabled>
+            Select warranty period
+          </option>
+
+          {warrantyOptions.map((option) => {
+            let displayText = option.label;
+
+            if (
+              formData.warranty &&
+              selectedWarrantyMonths === option.value &&
+              formData.purchase_date
+            ) {
+              const tempDate = new Date(formData.purchase_date);
+              tempDate.setMonth(tempDate.getMonth() + option.value);
+              displayText = tempDate.toISOString().split("T")[0];
+            }
+
+            return (
+              <option key={option.value} value={option.value}>
+                {displayText}
+              </option>
+            );
+          })}
+        </select>
       </div>
 
       <div className="flex flex-col">

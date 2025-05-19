@@ -105,6 +105,16 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess, vehicl
     }
   };
 
+    const warrantyOptions = [
+      { label: "3 years", value: 36 },
+      { label: "6 years", value: 60 },
+      { label: "10 years", value: 100 },
+    ];
+  
+    const [selectedWarrantyMonths, setSelectedWarrantyMonths] = useState<
+      number | null
+    >(null);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
@@ -254,27 +264,57 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ onClose, onAddSuccess, vehicl
         />
       </div>
 
-      {/* Warranty */}
-      <div className="flex flex-col">
+<div className="flex flex-col">
         <label className="mb-1 font-medium text-xs text-gray-700 dark:text-gray-300">
           Warranty
         </label>
-        <DatePicker
-          selected={formData.warranty}
-          onChange={(date: Date | null) =>
-            setFormData((prev) => ({
-              ...prev,
-              warranty: date,
-            }))
-          }
-          dateFormat="yyyy-MM-dd"
-          placeholderText="Select a date"
+        <select
           className="border rounded-md p-2 bg-white text-xs text-gray-700 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-400 w-full"
-          calendarClassName="dark:bg-gray-700 dark:text-black"
-          showMonthDropdown
-          showYearDropdown
-          dropdownMode="select"
-        />
+          onChange={(e) => {
+            const months = parseInt(e.target.value, 10);
+            setSelectedWarrantyMonths(months);
+
+            if (formData.acquisition_date) {
+              const newWarrantyDate = new Date(formData.acquisition_date);
+              newWarrantyDate.setMonth(newWarrantyDate.getMonth() + months);
+              setFormData((prev) => ({
+                ...prev,
+                warranty: newWarrantyDate,
+              }));
+            } else {
+              setFormData((prev) => ({
+                ...prev,
+                warranty: null,
+              }));
+            }
+          }}
+          value={selectedWarrantyMonths ?? ""}
+          disabled={!formData.acquisition_date}
+        >
+          <option value="" disabled>
+            Select warranty period
+          </option>
+
+          {warrantyOptions.map((option) => {
+            let displayText = option.label;
+
+            if (
+              formData.warranty &&
+              selectedWarrantyMonths === option.value &&
+              formData.acquisition_date
+            ) {
+              const tempDate = new Date(formData.acquisition_date);
+              tempDate.setMonth(tempDate.getMonth() + option.value);
+              displayText = tempDate.toISOString().split("T")[0];
+            }
+
+            return (
+              <option key={option.value} value={option.value}>
+                {displayText}
+              </option>
+            );
+          })}
+        </select>
       </div>
 
       {/* Maintenance Due */}
