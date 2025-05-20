@@ -540,7 +540,7 @@ export default function Projects() {
                           <tr>
                             <th className="px-4 py-3 text-left">Name</th>
                             <th className="px-4 py-3 text-left">Tag</th>
-                            <th className="px-4 py-3 text-left">Quantity</th>
+                            {/* <th className="px-4 py-3 text-left">Quantity</th> */}
                             <th className="px-4 py-3 text-left">Unit</th>
                           </tr>
                         </thead>
@@ -558,9 +558,9 @@ export default function Projects() {
                                 <td className="px-4 py-3 text-xs">
                                   {item.tag}
                                 </td>
-                                <td className="px-4 py-3 text-xs">
+                                {/* <td className="px-4 py-3 text-xs">
                                   {item.allocated_quantity}
-                                </td>
+                                </td> */}
                                 <td className="px-4 py-3 text-xs">
                                   {item.unit}
                                 </td>
