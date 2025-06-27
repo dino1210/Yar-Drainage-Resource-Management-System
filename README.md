@@ -2,6 +2,7 @@
 
 A web-based resource management system designed for Yar Drainage — a company specializing in construction and drainage services. This web-based application helps manage tools, equipment, vehicles, and consumables with better tracking, and resource visibility.
 
+ 🔗 [**Live Demo**](http://yar-ims.s3-website-ap-southeast-2.amazonaws.com/)  
  🎓 Capstone Project | 👥 Client-Based 
 
 ---
@@ -58,9 +59,7 @@ A web-based resource management system designed for Yar Drainage — a company s
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
+## 🚀 Prerequisites
 - Node.js & npm
 - MySQL server
 - XAMPP (or any local server for database)
