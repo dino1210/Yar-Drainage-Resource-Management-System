@@ -57,7 +57,7 @@ CREATE TABLE `consumables` (
   `minStock` int(11) NOT NULL,
   `unit` varchar(50) NOT NULL,
   `location` varchar(255) NOT NULL,
-  `date` date NOT NULL DEFAULT current_timestamp(),
+  `date` DATETIME NOT NULL DEFAULT current_timestamp(),
   `status` varchar(50) NOT NULL DEFAULT 'In Stock',
   `qr` varchar(255) NOT NULL,
   `category` varchar(255) DEFAULT NULL
@@ -77,30 +77,30 @@ INSERT INTO `consumables` (`consumable_id`, `picture`, `tag`, `name`, `quantity`
 --
 -- Triggers `consumables`
 --
-DELIMITER $$
-CREATE TRIGGER `update_consumables_status` BEFORE INSERT ON `consumables` FOR EACH ROW BEGIN
-  IF NEW.quantity = 0 THEN
-    SET NEW.status = 'No Stock';
-  ELSEIF NEW.quantity < NEW.minStock THEN
-    SET NEW.status = 'Low Stock';
-  ELSE
-    SET NEW.status = 'In Stock';
-  END IF;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `update_consumables_status_on_update` BEFORE UPDATE ON `consumables` FOR EACH ROW BEGIN
-  IF NEW.quantity = 0 THEN
-    SET NEW.status = 'No Stock';
-  ELSEIF NEW.quantity < NEW.minStock THEN
-    SET NEW.status = 'Low Stock';
-  ELSE
-    SET NEW.status = 'In Stock';
-  END IF;
-END
-$$
-DELIMITER ;
+-- DELIMITER $$
+-- CREATE TRIGGER `update_consumables_status` BEFORE INSERT ON `consumables` FOR EACH ROW BEGIN
+--   IF NEW.quantity = 0 THEN
+--     SET NEW.status = 'No Stock';
+--   ELSEIF NEW.quantity < NEW.minStock THEN
+--     SET NEW.status = 'Low Stock';
+--   ELSE
+--     SET NEW.status = 'In Stock';
+--   END IF;
+-- END
+-- $$
+-- DELIMITER ;
+-- DELIMITER $$
+-- CREATE TRIGGER `update_consumables_status_on_update` BEFORE UPDATE ON `consumables` FOR EACH ROW BEGIN
+--   IF NEW.quantity = 0 THEN
+--     SET NEW.status = 'No Stock';
+--   ELSEIF NEW.quantity < NEW.minStock THEN
+--     SET NEW.status = 'Low Stock';
+--   ELSE
+--     SET NEW.status = 'In Stock';
+--   END IF;
+-- END
+-- $$
+-- DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -274,11 +274,11 @@ CREATE TABLE `tools` (
 --
 
 INSERT INTO `tools` (`tool_id`, `picture`, `name`, `brand`, `category`, `tag`, `description`, `purchase_date`, `warranty`, `status`, `remarks`, `qr`, `qr_code_id`, `created_at`, `created_by`) VALUES
-(1, '1745821307732-503816072.jpg', 'Contender Welding Machine', 'Contender', 'Welding Machine', 'POWER-WLDGM_CONTNDR-1', 'Input Voltage, 220. Maximum Rod Diameter, 4.0 mm. Rated Input Capacity, 10.2', '2025-03-31', '2026-04-27', 'Available', 'Brand New', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4.png', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4', '0000-00-00', ''),
-(2, '1745821628548-538938628.jpg', 'Dartek Angle Grinder', 'Dartek', 'Angle Grinder', 'POWER-ANGLGRNDR_DARTEK-1', 'Rated Input Power, 760W. No-Load Speed, 11500r/min. Max Wheel Diameter, 100mm. Hole Diameter of Wheel, 16mm.', '2025-03-31', '2025-04-24', 'Available', 'Brand New', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c.png', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c', '0000-00-00', ''),
-(3, '1745821790372-377372672.jpg', 'Megaman Floodlight ', 'Megaman', 'Light', 'POWER-FLDLIGHT_MGMN-1', '0W 840 IP66 IK08. 711433 ; FL TITO 90W 840 IP66 IK08. 710825 ; FL TITO 120W 840 IP66 IK08.', '2025-04-01', '2049-04-13', 'Available', 'Brand New', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21.png', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21', '0000-00-00', ''),
-(4, '1745821991819-726796547.jpg', 'Makita Nail Gun', 'Makita', 'Nail Gun', 'POWER-NAILGUN_MKTA-1', 'Nail size capacity: 10-50mm (19/32\"-2\") Nail type: F15-F50 Gauge: 18 Operating pressure: 60-100psi', '2025-03-31', '2027-04-07', 'Available', 'Brand New', 'TOOL-344ede88-66df-4571-adca-79450032c487.png', 'TOOL-344ede88-66df-4571-adca-79450032c487', '0000-00-00', ''),
-(5, '1745822173903-752629888.jpg', 'Welding Mask', 'Generic', 'Welding Mask', 'OTHERS-WLDGMASK-1', 'equipped with #12 Dark Glass for safety', '2025-03-31', '2025-04-08', 'Available', 'Brand New', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760.png', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760', '0000-00-00', ''),
+(1, '1745821307732-503816072.jpg', 'Contender Welding Machine', 'Contender', 'Welding Machine', 'POWER-WLDGM_CONTNDR-1', 'Input Voltage, 220. Maximum Rod Diameter, 4.0 mm. Rated Input Capacity, 10.2', '2025-03-31', '2026-04-27', 'Available', 'Brand New', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4.png', 'TOOL-312edc10-82b0-4500-8683-a031996e18f4', 'NULL', ''),
+(2, '1745821628548-538938628.jpg', 'Dartek Angle Grinder', 'Dartek', 'Angle Grinder', 'POWER-ANGLGRNDR_DARTEK-1', 'Rated Input Power, 760W. No-Load Speed, 11500r/min. Max Wheel Diameter, 100mm. Hole Diameter of Wheel, 16mm.', '2025-03-31', '2025-04-24', 'Available', 'Brand New', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c.png', 'TOOL-cadb0389-23f2-4702-a5a8-1ece4decfc9c', 'NULL', ''),
+(3, '1745821790372-377372672.jpg', 'Megaman Floodlight ', 'Megaman', 'Light', 'POWER-FLDLIGHT_MGMN-1', '0W 840 IP66 IK08. 711433 ; FL TITO 90W 840 IP66 IK08. 710825 ; FL TITO 120W 840 IP66 IK08.', '2025-04-01', '2049-04-13', 'Available', 'Brand New', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21.png', 'TOOL-ce29f0eb-2fe7-4bba-be16-f3ee03e7dd21', 'NULL', ''),
+(4, '1745821991819-726796547.jpg', 'Makita Nail Gun', 'Makita', 'Nail Gun', 'POWER-NAILGUN_MKTA-1', 'Nail size capacity: 10-50mm (19/32\"-2\") Nail type: F15-F50 Gauge: 18 Operating pressure: 60-100psi', '2025-03-31', '2027-04-07', 'Available', 'Brand New', 'TOOL-344ede88-66df-4571-adca-79450032c487.png', 'TOOL-344ede88-66df-4571-adca-79450032c487', 'NULL', ''),
+(5, '1745822173903-752629888.jpg', 'Welding Mask', 'Generic', 'Welding Mask', 'OTHERS-WLDGMASK-1', 'equipped with #12 Dark Glass for safety', '2025-03-31', '2025-04-08', 'Available', 'Brand New', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760.png', 'TOOL-4b262466-e3ba-40b2-ae32-1418627ce760', 'NULL', ''),
 (21, '1746663301961-669941794.jpg', 'TEST', 'TEST', 'TEST', 'cfvgbknm', 'hjnkm,', '2025-05-05', '2025-05-22', 'Available', 'vgkbjkn,', 'TOOL-b998a88d-5553-4560-a551-756ebb7c1dcb.png', 'TOOL-b998a88d-5553-4560-a551-756ebb7c1dcb', '2025-05-08', 'Admin'),
 (22, '1746663657159-122363514.jpg', 'ADDED', 'tvuygbhnj', 'gbhknj', 'tygbhunj', 'ftgybhnjk', '2025-05-04', '2025-05-06', 'Available', 'gbjnk', 'TOOL-a779d992-fc25-4a26-ab1b-d87894d60d06.png', 'TOOL-a779d992-fc25-4a26-ab1b-d87894d60d06', '2025-05-08', 'Admin'),
 (23, '1746663728291-274718159.jpg', 'NEWYVGBIHNKJ', 'ygbihnujmk', 'ygbihunjk', 'gbhunjmk', 'yuijmkl', '2025-05-07', '2025-05-14', 'Available', 'j km,', 'TOOL-eadcc17d-0b1f-4a6c-9e97-07a9444e2d9a.png', 'TOOL-eadcc17d-0b1f-4a6c-9e97-07a9444e2d9a', '2025-05-08', 'Admin'),
@@ -356,9 +356,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `profile`, `status`, `date_created`) VALUES
-(1, 'Admin', 'admin', '$2a$10$ysgopAQfZawXdZ1g/FR14.H6AHlM9WXN3b8xgFumPfCslOuggBGrC', 'Admin', '', 'Active', '0000-00-00'),
-(3, 'Staff', 'staff', '$2a$10$HubgO1cxr6VuWG1/ckSXm.j/C1CAHT7IvcnCRaO5Xq5SD/4FWinmm', 'Staff', '', 'Active', '0000-00-00'),
-(4, 'Manager', 'manager', '$2a$10$1zRRsugnSAyQP87QqIV9cuNIoVhbaV/CEP3bgnZ2zGkguu0.Y72EC', 'Manager', '', 'Active', '0000-00-00'),
+(1, 'Admin', 'admin', '$2a$10$ysgopAQfZawXdZ1g/FR14.H6AHlM9WXN3b8xgFumPfCslOuggBGrC', 'Admin', '', 'Active', 'NULL'),
+(3, 'Staff', 'staff', '$2a$10$HubgO1cxr6VuWG1/ckSXm.j/C1CAHT7IvcnCRaO5Xq5SD/4FWinmm', 'Staff', '', 'Active', 'NULL'),
+(4, 'Manager', 'manager', '$2a$10$1zRRsugnSAyQP87QqIV9cuNIoVhbaV/CEP3bgnZ2zGkguu0.Y72EC', 'Manager', '', 'Active', 'NULL'),
 (15, 'Nolly Alvarado', 'nolly', '$2b$10$0Goa0nFhCO3cxMKw7hXZOe0HFlx.BGfCaJWWvbC26RfvRa1JLE.cO', 'Admin', '', 'Active', '2025-05-06');
 
 -- --------------------------------------------------------
@@ -517,7 +517,7 @@ ALTER TABLE `vehicles_logs`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `consumables`
